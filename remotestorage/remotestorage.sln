@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E6C5B1F-00C4-49AA-8188-F1C181759F14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "remotestorage", "src\remotestorage\remotestorage.csproj", "{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5B9BD827-A699-406C-952D-F5F98124C596}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "remotestorage.Tests", "tests\remotestorage.Tests\remotestorage.Tests.csproj", "{F3792E04-433B-4C73-9A83-31346B174664}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+	request	HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3792E04-433B-4C73-9A83-31346B174664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3792E04-433B-4C73-9A83-31346B174664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3792E04-433B-4C73-9A83-31346B174664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3792E04-433B-4C73-9A83-31346B174664}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9D5D245D-7A44-4FDF-A42A-EBB326EDFFCD} = {6E6C5B1F-00C4-49AA-8188-F1C181759F14}
+		{F3792E04-433B-4C73-9A83-31346B174664} = {5B9BD827-A699-406C-952D-F5F98124C596}
+	EndGlobalSection
+EndGlobal

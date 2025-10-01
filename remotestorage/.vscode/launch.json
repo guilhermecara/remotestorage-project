@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch remotestorage-front",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build solution",
+      "program": "${workspaceFolder}/src/remotestorage/bin/Debug/net9.0/remotestorage.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/remotestorage",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/src/remotestorage/Views"
+      }
+    }
+  ]
+}

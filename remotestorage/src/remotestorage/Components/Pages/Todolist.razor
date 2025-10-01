@@ -1,0 +1,28 @@
+@page "/todolist"
+@rendermode InteractiveServer
+
+<h1>Todo</h1>
+
+<div class="input-section">
+    <input @bind="newTodo" type="text" id="todo-input-id" name="todo-input" placeholder="Write item's content here" />
+    <button @onclick="CreateItem">Add todo</button>
+</div>
+
+@code {
+    private List<TodoItem> todos = new();
+    string newTodo = "";
+    private void CreateItem()
+    {
+        TodoItem novoitem = new TodoItem();
+        novoitem.Title = newTodo;
+        todos.Add(novoitem);
+        Console.WriteLine("Item was clicked!");
+    }
+}
+
+<ul>
+    @foreach (TodoItem todo in todos)
+    {
+        <li>@todo.Title</li>
+    }
+</ul>

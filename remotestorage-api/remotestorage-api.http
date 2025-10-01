@@ -1,0 +1,6 @@
+@remotestorage_api_HostAddress = http://localhost:5050
+
+GET {{remotestorage_api_HostAddress}}/image/
+Accept: application/json
+
+###

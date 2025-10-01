@@ -1,0 +1,101 @@
+@page "/images"
+
+@rendermode InteractiveServer
+
+
+<h1>Images</h1>
+
+@if (Images == null || Images.Count == 0)
+{
+    <p>No images found.</p>
+}
+else
+{
+    <ul>
+        @foreach (var img in Images)
+        {
+            <li>
+                <b>@img.id</b> - @img.description
+                <button class="buttonDelete" @onclick="async () => await DeleteImage(img.id)">
+                    Delete
+                </button>
+            </li>
+        }
+    </ul>
+}
+
+<button class="buttonAdd" @onclick="ToggleAddImage">Add</button>
+
+@if (HasToggledAddImage)
+{
+    <AddImage />
+}
+
+@code {
+    private List<Image> Images = new();
+
+    [Inject] public HttpClient Http { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadImages();
+    }
+
+    private async Task LoadImages()
+    {
+        try
+        {
+            Images = await Http.GetFromJsonAsync<List<Image>>("http://remotestorage-api:5050/image")
+            ?? new List<Image>();
+            Console.WriteLine($"Loaded {Images.Count} images.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading images: {ex.Message}");
+            Images = new List<Image>(); // fallback to empty list
+        }
+    }
+
+    private async Task DeleteImage(int id)
+    {
+        Console.WriteLine($"Delete clicked for image {id}");
+
+        try
+        {
+            var response = await Http.DeleteAsync($"http://remotestorage-api:5050/image/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var img = Images.FirstOrDefault(i => i.id == id);
+                if (img != null)
+                {
+                    Images.Remove(img);
+                    StateHasChanged();
+                }
+
+                Console.WriteLine($"Image {id} deleted successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to delete image {id}: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting image {id}: {ex.Message}");
+        }
+    }
+
+    bool HasToggledAddImage = false;
+    public void ToggleAddImage()
+    {
+        HasToggledAddImage = !HasToggledAddImage;
+    }
+
+    public class Image
+    {
+        public int id { get; set; }
+        public string? description { get; set; }
+        public string? content { get; set; }
+    }
+}

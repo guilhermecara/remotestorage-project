@@ -1,0 +1,34 @@
+
+
+h1 {
+    text-align: center;
+}
+
+.flexlist {
+    display: flex;
+    gap: 8px;
+}
+
+.buttonDelete {
+    border-radius: 6px;
+    padding: 2px 8px;       /* smaller padding = slimmer button */
+    background-color: #e53935;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;         /* keeps text compact */
+    transition: background-color 0.2s ease;
+}
+
+.buttonAdd {
+    border-radius: 6px;
+    padding: 5px 15px;       /* smaller padding = slimmer button */
+    background-color: #035c25;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.6rem;
+    line-height: 1;         /* keeps text compact */
+    transition: background-color 0.2s ease;
+}
