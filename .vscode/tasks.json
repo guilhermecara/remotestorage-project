@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/remotestorage-api/remotestorage-api.csproj"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "build frontend app",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/remotestorage/src/remotestorage/remotestorage.csproj"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "build frontend tests",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/remotestorage/test/remotestorage.Tests.csproj"
+      ],
+      "group": "build"
+    }
+  ]
+}

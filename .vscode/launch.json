@@ -1,0 +1,63 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // API backend
+      "name": "Launch remotestorage-api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build api",
+      "program": "${workspaceFolder}/remotestorage-api/bin/Debug/net9.0/remotestorage-api.dll",
+      "cwd": "${workspaceFolder}/remotestorage-api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      // Frontend App
+      "name": "Launch frontend-app",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build frontend app",
+      "program": "${workspaceFolder}/remotestorage/src/remotestorage/bin/Debug/net9.0/remotestorage.dll",
+      "cwd": "${workspaceFolder}/remotestorage/src",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      // Frontend Tests
+      "name": "Run frontend-tests",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build frontend tests",
+      "program": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/remotestorage/test/remotestorage.Tests.csproj",
+        "--no-build"
+      ],
+      "cwd": "${workspaceFolder}/remotestorage/test"
+    }
+  ],
+
+  "compounds": [
+    {
+      "name": "API + Frontend",
+      "configurations": [
+        "Launch remotestorage-api",
+        "Launch frontend-app"
+      ]
+    }
+  ]
+}
