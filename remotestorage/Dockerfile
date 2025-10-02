@@ -2,14 +2,17 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copy solution + restore
-COPY remotestorage.sln ./
-COPY src/remotestorage/remotestorage.csproj ./src/remotestorage/
-RUN dotnet restore ./src/remotestorage/remotestorage.csproj
+# Copy csproj and restore (cache friendly)
+COPY src/remotestorage/remotestorage.csproj ./remotestorage/
+RUN dotnet restore ./remotestorage/remotestorage.csproj
 
-# Copy all source and build
-COPY . .
-WORKDIR /src/src/remotestorage
+# Copy the rest of the source
+COPY src/remotestorage ./remotestorage
+
+# Go into the project folder (absolute path!)
+WORKDIR /src/remotestorage
+
+# Build and publish
 RUN dotnet publish -c Release -o /app/publish
 
 # --- Runtime stage ---
@@ -18,5 +21,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 EXPOSE 8080
 
-# Run the app
 ENTRYPOINT ["dotnet", "remotestorage.dll"]

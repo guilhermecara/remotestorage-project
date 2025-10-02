@@ -35,9 +35,14 @@ else
     private List<Image> Images = new();
 
     [Inject] public HttpClient Http { get; set; } = default!;
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
+        var apiBaseUrl = Configuration["API_BASE_URL"] ?? "http://localhost:5050";
+            Http.BaseAddress = new Uri(apiBaseUrl);
+
+
         await LoadImages();
     }
 
@@ -45,7 +50,7 @@ else
     {
         try
         {
-            Images = await Http.GetFromJsonAsync<List<Image>>("http://remotestorage-api:5050/image")
+            Images = await Http.GetFromJsonAsync<List<Image>>("image") 
             ?? new List<Image>();
             Console.WriteLine($"Loaded {Images.Count} images.");
         }
