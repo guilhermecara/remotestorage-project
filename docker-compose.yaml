@@ -22,10 +22,12 @@ services:
     depends_on:
       - api
   database:
-    image: postgres:17
+    build:
+      context: ./remotestorage-db
+      dockerfile: Dockerfile
     container_name: database
     ports:
-      - "6060:6060"
+      - "6060:5432"
     environment:
       POSTGRES_USER: guilhermeuser
       POSTGRES_PASSWORD: LIbolo0$
