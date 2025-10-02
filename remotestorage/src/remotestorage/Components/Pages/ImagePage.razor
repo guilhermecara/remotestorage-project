@@ -15,7 +15,7 @@ else
         @foreach (var img in Images)
         {
             <li>
-                <b>@img.id</b> - @img.description
+                <b>@img.id</b> - @img.name
                 <button class="buttonDelete" @onclick="async () => await DeleteImage(img.id)">
                     Delete
                 </button>
@@ -40,7 +40,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         var apiBaseUrl = Configuration["API_BASE_URL"] ?? "http://localhost:5050";
-            Http.BaseAddress = new Uri(apiBaseUrl);
+        Http.BaseAddress = new Uri(apiBaseUrl);
 
 
         await LoadImages();
@@ -50,7 +50,7 @@ else
     {
         try
         {
-            Images = await Http.GetFromJsonAsync<List<Image>>("image") 
+            Images = await Http.GetFromJsonAsync<List<Image>>("image")
             ?? new List<Image>();
             Console.WriteLine($"Loaded {Images.Count} images.");
         }
@@ -100,7 +100,7 @@ else
     public class Image
     {
         public int id { get; set; }
-        public string? description { get; set; }
-        public string? content { get; set; }
+        public string? name { get; set; }
+        public string? url { get; set; }
     }
 }

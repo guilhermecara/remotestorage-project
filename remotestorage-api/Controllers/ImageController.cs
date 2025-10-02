@@ -2,6 +2,7 @@ using remotestorage_api.Models;
 using remotestorage_api.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace remotestorage_api.Controllers;
 
@@ -15,7 +16,11 @@ public class ImageController : ControllerBase
 
     // GET all action
     [HttpGet]
-    public ActionResult<List<Image>> GetAll() => ImageService.GetAll(); //Replaces the default action by our custom-build one.
+    public async Task<IActionResult> GetImages()
+    {
+        var images = await ImageService.GetAll();
+        return Ok(images);
+    }
 
     // GET by Id action
 
@@ -27,19 +32,19 @@ public class ImageController : ControllerBase
         {
             return NotFound(); // API specific syntax to return back an unsucessfull call!
         }
-        return image;
+        return Ok(image);
     }
 
-    [HttpGet("by-query")]
-    public ActionResult<Image> GetByQuery([FromQuery] int id) //Fromquery filters the value haha!
-    {
-        var image = ImageService.Get(id);
-        if (image == null)
-        {
-            return NotFound(); // API specific syntax to return back an unsucessfull call!
-        }
-        return image;
-    }
+    //[HttpGet("by-query")]
+    ////public ActionResult<Image> GetByQuery([FromQuery] int id) //Fromquery filters the value haha!
+    //{
+    //    var image = ImageService.Get(id);
+    //    if (image == null)
+    //    {
+    //        return NotFound(); // API specific syntax to return back an unsucessfull call!
+    //    }
+    //    return Ok(Image);
+    //}
 
     // POST action
 
@@ -56,12 +61,12 @@ public class ImageController : ControllerBase
 
     // DELETE action
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         var image = ImageService.Get(id);
         if (image != null)
         {
-            ImageService.Delete(id);
+            await ImageService.Delete(id);
             return NoContent();
         }
         else

@@ -1,62 +1,80 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using remotestorage_api.Models;
+using System;
+using Npgsql;
+using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 
 namespace remotestorage_api.Services;
 
 public static class ImageService
 {
-    static List<Image> Images;
-    static int nextId = 3;
-    static ImageService()
+    static string connectionUser = "guilhermeuser";
+    static string connectionPassword = "LIbolo0$";
+    static string connectionDb = "database";
+    static string connectionHost = "localhost"; // change if needed
+    static int connectionPort = 6060;
+    private static string GetConnectionString() =>
+        $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
+
+    static List<Image>? Images;
+
+    public static async Task<List<Image>> GetAll()
     {
-        Images = new List<Image>
+        var images = new List<Image>();
+
+        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
+        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images");
+        await using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
         {
-            new Image {Id = 1, Description = "The first image ever!", Content = ""},
-            new Image {Id = 2, Description = "The second image?", Content = ""}
-        };
+            images.Add(new Image
+            {
+                Id = reader.GetInt32(0),       // column 0 -> id
+                Name = reader.GetString(1),    // column 1 -> name
+                Url = reader.GetString(2)      // column 2 -> url
+            });
+        }
+
+        return images;
     }
 
-    public static List<Image> GetAll()
+
+    public static async Task<Image>? Get(int ImageId)
     {
-        return Images;
-    }
+        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
+        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images WHERE Id = @id");
+        command.Parameters.AddWithValue("id", ImageId);
 
-    public static Image? Get(int ImageId)
-    {
-        Image found = Images.FirstOrDefault(img => img.Id == ImageId);
+        await using var reader = await command.ExecuteReaderAsync();
 
-        if (found != null)
+        Image fetchImage = new Image();
+        while (await reader.ReadAsync())
         {
-            Console.WriteLine($"Found: {found.Id}");
+            fetchImage.Id = reader.GetInt32(0);     // column 0 -> id
+            fetchImage.Name = reader.GetString(1);   // column 1 -> name
+            fetchImage.Url = reader.GetString(2);     // column 2 -> url
         }
-        else
-        {
-            Console.WriteLine("Not found.");
-        }
-
-        return found;
+        Console.WriteLine("Fetch image loaded?");
+        return fetchImage;
     }
 
     public static void Add(Image image)
     {
-        image.Id = nextId++;
-        Images.Add(image);
     }
 
-    public static void Delete(int id)
+    public static async Task Delete(int id)
     {
-        var result = Get(id);
-        if (result is not null)
-        {
-            Images.Remove(result);
-            return;
-        }
-        Console.WriteLine($"Image ({id}) removed!");
+        Console.WriteLine("API RECIEVED A DELETE CALL!");
+        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
+        await using var command = dataSource.CreateCommand("DELETE FROM images WHERE id = @id");
+        command.Parameters.AddWithValue("id", id);
+        await command.ExecuteReaderAsync();
     }
 
     public static void Update(Image image)
     {
-
     }
 
 }
