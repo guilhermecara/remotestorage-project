@@ -8,9 +8,6 @@ services:
     container_name: remotestorage-api
     ports:
       - "5050:5050"
-    environment:
-      - DOTNET_ENVIRONMENT=Development
-
   frontend:
     build:
       context: ./remotestorage

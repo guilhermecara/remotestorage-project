@@ -6,9 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+var apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL")
+                 ?? builder.Configuration["ApiSettings:BaseUrl"]; // defined in appsettings.json
+
 builder.Services.AddHttpClient("API", client =>
 {
-    client.BaseAddress = new Uri("https://remotestorage-api:5050");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 var app = builder.Build();

@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy csproj and restore dependencies
-COPY *.csproj ./
+COPY remotestorage-api.csproj ./
 RUN dotnet restore ./remotestorage-api.csproj
 
 # Copy everything else and build
