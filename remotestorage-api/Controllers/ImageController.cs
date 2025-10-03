@@ -25,9 +25,9 @@ public class ImageController : ControllerBase
     // GET by Id action
 
     [HttpGet("{id}")]//ByField
-    public ActionResult<Image> Get(int id)
+    public async Task<ActionResult<Image>> Get(int id)
     {
-        var image = ImageService.Get(id);
+        var image = await ImageService.Get(id);
         if (image == null)
         {
             return NotFound(); // API specific syntax to return back an unsucessfull call!

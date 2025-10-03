@@ -41,10 +41,10 @@ public static class ImageService
     }
 
 
-    public static async Task<Image>? Get(int ImageId)
+    public static async Task<Image?> Get(int ImageId)
     {
         await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
-        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images WHERE Id = @id");
+        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images WHERE id = @id");
         command.Parameters.AddWithValue("id", ImageId);
 
         await using var reader = await command.ExecuteReaderAsync();
@@ -55,9 +55,11 @@ public static class ImageService
             fetchImage.Id = reader.GetInt32(0);     // column 0 -> id
             fetchImage.Name = reader.GetString(1);   // column 1 -> name
             fetchImage.Url = reader.GetString(2);     // column 2 -> url
+
+            return fetchImage;
         }
-        Console.WriteLine("Fetch image loaded?");
-        return fetchImage;
+        
+        return null;
     }
 
     public static void Add(Image image)
@@ -66,11 +68,15 @@ public static class ImageService
 
     public static async Task Delete(int id)
     {
-        Console.WriteLine("API RECIEVED A DELETE CALL!");
-        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
-        await using var command = dataSource.CreateCommand("DELETE FROM images WHERE id = @id");
-        command.Parameters.AddWithValue("id", id);
-        await command.ExecuteReaderAsync();
+        if (Get(id) != null)
+        {
+            await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
+            await using var command = dataSource.CreateCommand("DELETE FROM images WHERE id = @id");
+            command.Parameters.AddWithValue("id", id);
+            await command.ExecuteReaderAsync();
+
+            Console.WriteLine("Image deleted successfully");
+        }
     }
 
     public static void Update(Image image)
