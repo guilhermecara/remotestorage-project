@@ -67,7 +67,7 @@ else
 
         try
         {
-            var response = await Http.DeleteAsync($"http://remotestorage-api:5050/image/{id}");
+            var response = await Http.DeleteAsync($"image/{id}");
 
             if (response.IsSuccessStatusCode)
             {
