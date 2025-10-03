@@ -1,18 +1,45 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class = "top-row">
+            <div class = "top-row-logo">
+                <img src="/images/logo.png" class = "logo-img"/>
+                <span>GuiFotos™</span>
+            </div>
+
+            <div class="top-row-searchbar">
+                <label for="search-input"><img src="/images/search.svg"/></label>
+                <input type="text" placeholder="Search your photos" id ="search-input"/>
+                <img src="/images/menu.svg"/>
+            </div>
+
+            <div class="top-row-settings">
+                <div>
+                    <button type="button" name = "upload-button" id = "upload-button-id"> 
+                        <img src="/images/upload.svg"/>
+                    </button>
+                    <label for="upload-button-id">Upload</label>
+                </div>
+
+                <a href="/">
+                    About
+                </a>
+            </div>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
+        <div class="content">
+            <nav class = "content-navbar">
+                <ul>
+                    <li><a href="/image">Photos</a></li>
+                </ul>
+            </nav>
+
+            <div>
+                @Body
+            </div>
+        </div>
     </main>
 </div>
 
