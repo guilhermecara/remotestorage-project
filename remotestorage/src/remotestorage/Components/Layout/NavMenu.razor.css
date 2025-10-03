@@ -1,5 +1,17 @@
 
 
+a {
+    color: var(--bs-black);
+    text-decoration: none;
+}
+label{
+    color: var(--bs-black);
+}
+
+.svg-white-to-black {
+     filter: invert(1) brightness(0);
+}
+
 @media (min-width: 641px) {
     .navbar-toggler {
         display: none;
@@ -10,8 +22,6 @@
         display: block;
 
         /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
-        overflow-y: auto;
     }
 }
 /* OLD NAVMENU CSS
