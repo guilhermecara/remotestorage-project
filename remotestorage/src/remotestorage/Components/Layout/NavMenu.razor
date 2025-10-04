@@ -1,12 +1,22 @@
-﻿
+﻿@inject NavigationManager Nav
 
-<div class = "nav-menu">
-    <ul>
-        <li>
-            <a href="/images">
-                <img src="/images/photo-library.svg" class = "svg-white-to-black"/>
-                Photos
-            </a>
-        </li>
-    </ul>
-</div>
+<nav class="nav flex-column">
+    <a href="/" class="nav-link @(IsActive("/"))">
+        <img src="/images/home.svg" class="svg-white-to-black" />
+        Home
+    </a>
+
+    <a href="/images" class="nav-link @(IsActive("/images"))">
+        <img src="/images/photo-library.svg" class="svg-white-to-black" />
+        Photos
+    </a>
+</nav>
+
+@code {
+    private string IsActive(string href)
+    {
+        var current = Nav.Uri.Replace(Nav.BaseUri, "/").TrimEnd('/');
+        var target = href.TrimEnd('/');
+        return current.Equals(target, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+}
