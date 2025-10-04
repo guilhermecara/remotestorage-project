@@ -10,6 +10,12 @@ services:
       - "5050:5050"
     depends_on:
       - database
+    environment:
+      POSTGRES_USER: guilhermeuser
+      POSTGRES_PASSWORD: LIbolo0$
+      POSTGRES_DB: database
+      DB_HOST: database
+      DB_PORT: 5432 
   frontend:
     build:
       context: ./remotestorage
@@ -28,12 +34,11 @@ services:
     container_name: database
     ports:
       - "6060:5432"
-    environment:
-      POSTGRES_USER: guilhermeuser
-      POSTGRES_PASSWORD: LIbolo0$
-      POSTGRES_DB: database
     volumes: 
       - database-data:/var/lib/postgresql/data
-
+    environment:
+        POSTGRES_USER: guilhermeuser
+        POSTGRES_PASSWORD: LIbolo0$
+        POSTGRES_DB: database
 volumes:
   database-data:

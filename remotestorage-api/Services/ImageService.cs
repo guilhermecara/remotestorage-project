@@ -9,11 +9,12 @@ namespace remotestorage_api.Services;
 
 public static class ImageService
 {
-    static string connectionUser = "guilhermeuser";
-    static string connectionPassword = "LIbolo0$";
-    static string connectionDb = "database";
-    static string connectionHost = "localhost"; // change if needed
-    static int connectionPort = 6060;
+    static string connectionUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "guilhermeuser";
+    static string connectionPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "LIbolo0$";
+    static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database";
+    static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+    static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060;
+    
     private static string GetConnectionString() =>
         $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
 
@@ -21,6 +22,8 @@ public static class ImageService
 
     public static async Task<List<Image>> GetAll()
     {
+        Console.WriteLine("Testing the connection string:");
+        Console.WriteLine(GetConnectionString());
         var images = new List<Image>();
 
         await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
