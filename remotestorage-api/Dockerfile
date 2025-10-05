@@ -15,6 +15,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app ./
 
+ENV POSTGRES_USER=guilhermeuser
+ENV POSTGRES_PASSWORD=LIbolo0$
+ENV POSTGRES_DB=database
+ENV DB_HOST=database
+ENV DB_PORT=5432 
+
 # Expose port 5050
 EXPOSE 5050
 

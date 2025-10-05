@@ -14,7 +14,13 @@ public static class ImageService
     static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database";
     static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
     static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060;
-    
+
+    private static string GetImageDirectory() { 
+        string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/app/Images";
+        Directory.CreateDirectory(imageDir);
+        return imageDir;
+    }
+
     private static string GetConnectionString() =>
         $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
 

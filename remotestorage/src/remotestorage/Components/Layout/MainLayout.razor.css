@@ -3,7 +3,26 @@
     display: flex;
     flex-direction: column;
     margin: 0 2rem; 
-    background-color: var(--bs-white);
+
+    color-scheme: prefers-color-scheme;
+    
+    background-color: var(--primary-color);
+
+    --primary-color: var(--bs-white);
+    --secondary-color: var(--bs-gray-200);
+    --tertiary-color: var(--bs-black);
+
+    --active-color: var(--bs-gray-400);
+    --border-color: var(--bs-gray-300);
+}
+
+.dark-mode {
+   --primary-color: var(--bs-black);
+    --secondary-color: var(--bs-gray-200);
+    --tertiary-color: var(--bs-white);
+
+    --active-color: var(--bs-gray-400);
+    --border-color: var(--bs-gray-300);
 }
 
 main {
@@ -15,7 +34,7 @@ main {
 }
 
 .top-row {
-    background-color: var(--bs-white);
+    background-color: var(--primary-color);
     justify-content: space-between;
     display: flex;
     align-items: center;
@@ -23,7 +42,7 @@ main {
     padding-top: 40px;
     padding-bottom: 20px;
 
-    border-bottom: 1.5px solid var(--bs-gray-300);
+    border-bottom: 1.5px solid var(--border-color);
     border-radius: 10px;
 
 }
@@ -48,10 +67,9 @@ main {
         margin-right: 20px;
         
         border-radius: 20px;
-        background-color: var(--bs-gray-400);
+        background-color: var(--active-color);
 
         padding: 10px 16px;     /* increases height */
-        min-width: 200px;           /* fixed width OR remove for auto sizing */
         flex: 0.7;
 
         img {
@@ -159,11 +177,11 @@ main {
 }
 
 a {
-    color: var(--bs-black);
+    color: var(--tertiary-color);
     text-decoration: none;
 }
 label{
-    color: var(--bs-black);
+    color: var(--tertiary-color);
 }
 
 #blazor-error-ui {

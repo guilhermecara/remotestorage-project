@@ -21,4 +21,6 @@ WORKDIR /app
 COPY --from=build /app/publish .
 EXPOSE 8080
 
+ENV API_BASE_URL=http://remotestorage-api:5050
+
 ENTRYPOINT ["dotnet", "remotestorage.dll"]
