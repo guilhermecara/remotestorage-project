@@ -9,17 +9,13 @@ namespace remotestorage_api.Services;
 
 public static class ImageService
 {
-    static string connectionUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "guilhermeuser";
-    static string connectionPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "LIbolo0$";
-    static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database";
-    static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
-    static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060;
-
-    private static string GetImageDirectory() { 
-        string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/app/Images";
-        Directory.CreateDirectory(imageDir);
-        return imageDir;
-    }
+    // Database connection parameters from environment variables or default values for development
+    static string connectionUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "guilhermeuser"; // Default user for development
+    static string connectionPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "LIbolo0$"; // Default password for development
+    static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database"; // Default database for development
+    static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"; // Default host for development
+    static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060; // Default port for development
+    static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/home/guilherme/remotestorage-images"; // Default path for development
 
     private static string GetConnectionString() =>
         $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
@@ -28,6 +24,10 @@ public static class ImageService
 
     public static async Task<List<Image>> GetAll()
     {
+
+        string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/home/guilherme/remotestorage-images"; // Default path for development
+        File.WriteAllText(Path.Combine(imageDir, "log.txt"), "blah blah, text");
+        
         Console.WriteLine("Testing the connection string:");
         Console.WriteLine(GetConnectionString());
         var images = new List<Image>();
