@@ -5,33 +5,39 @@
 
 <h1>Images</h1>
 
-@if (Images == null || Images.Count == 0)
-{
-    <p>No images found.</p>
-}
-else
-{
-    <ul>
-        @foreach (var img in Images)
-        {
-            <li>
-                <b>@img.id</b> - @img.name
-                <button class="buttonDelete" @onclick="async () => await DeleteImage(img.id)">
-                    Delete
-                </button>
-            </li>
-        }
-    </ul>
-}
 
-<button class="buttonAdd" @onclick="ToggleAddImage">Add</button>
-
-@if (HasToggledAddImage)
-{
-    <AddImage />
-}
+<div class="gallery">
+    @foreach (var image in ImageUrls)
+    {
+        <img src="@image" class="photo" />
+    }
+</div>
 
 @code {
+    private readonly string[] ImageUrls = new[]
+    {
+        "https://picsum.photos/600/400",
+        "https://picsum.photos/400/600",
+        "https://picsum.photos/500/500",
+        "https://picsum.photos/700/500",
+        "https://picsum.photos/400/300",
+        "https://picsum.photos/500/700",
+        "https://picsum.photos/600/400",
+        "https://picsum.photos/400/600",
+        "https://picsum.photos/500/500",
+        "https://picsum.photos/700/500",
+        "https://picsum.photos/400/300",
+        "https://picsum.photos/500/700",
+        "https://picsum.photos/450/450",
+        "https://picsum.photos/300/400",
+        "https://picsum.photos/600/600",
+        "https://picsum.photos/500/350",
+        "https://picsum.photos/450/450",
+        "https://picsum.photos/300/400",
+        "https://picsum.photos/600/600",
+        "https://picsum.photos/500/350"
+    };
+
     private List<Image> Images = new();
 
     [Inject] public HttpClient Http { get; set; } = default!;
