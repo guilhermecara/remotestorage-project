@@ -13,7 +13,7 @@ services:
     environment:
       - IMAGE_DIR=/remotestorage-images
     volumes:
-      - /home/guilherme/remotestorage-images:/remotestorage-images
+      - /home/guilherme/.remotestorage-images:/remotestorage-images
   frontend:
     build:
       context: ./remotestorage

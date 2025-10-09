@@ -15,40 +15,61 @@ public static class ImageService
     static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database"; // Default database for development
     static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"; // Default host for development
     static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060; // Default port for development
-    static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/home/guilherme/remotestorage-images"; // Default path for development
+    static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/home/guilherme/.remotestorage-images"; // Default path for development
 
     private static string GetConnectionString() =>
         $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
 
-    static List<Image>? Images;
-
     public static async Task<List<Image>> GetAll()
+{
+    List<Image> imageData = new List<Image>();
+    await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
+    await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images");
+    await using var reader = await command.ExecuteReaderAsync();
+
+    while (await reader.ReadAsync())
     {
+        string relativeUrl = reader.GetString(2).TrimStart('/'); 
+        string fullPath = Path.Combine(imageDir, relativeUrl); 
 
-        string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? "/home/guilherme/remotestorage-images"; // Default path for development
-        File.WriteAllText(Path.Combine(imageDir, "log.txt"), "blah blah, text");
-        
-        Console.WriteLine("Testing the connection string:");
-        Console.WriteLine(GetConnectionString());
-        var images = new List<Image>();
+        // Log the path being checked
+        Console.WriteLine($"Checking image file at path: {fullPath}");
 
-        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
-        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images");
-        await using var reader = await command.ExecuteReaderAsync();
-
-        while (await reader.ReadAsync())
+        // Check if file exists
+        if (!System.IO.File.Exists(fullPath))
         {
-            images.Add(new Image
-            {
-                Id = reader.GetInt32(0),       // column 0 -> id
-                Name = reader.GetString(1),    // column 1 -> name
-                Url = reader.GetString(2)      // column 2 -> url
-            });
+            Console.WriteLine($"Warning: Image file not found at path {fullPath}");
+            continue; // Skip missing images
         }
 
-        return images;
+        // Read image file as bytes
+        byte[] imageBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+        string mimeType = GetMimeType(Path.GetExtension(fullPath));
+        string base64Image = $"data:{mimeType};base64,{Convert.ToBase64String(imageBytes)}";
+
+        imageData.Add(new Image
+        {
+            Id = reader.GetInt32(0),
+            Name = reader.GetString(1),
+            Url = fullPath,
+            ImageData = base64Image, 
+        });
     }
 
+    return imageData;
+}
+
+    private static string GetMimeType(string extension)
+    {
+        return extension.ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            _ => "application/octet-stream" // Fallback
+        };
+    }
 
     public static async Task<Image?> Get(int ImageId)
     {
@@ -67,7 +88,7 @@ public static class ImageService
 
             return fetchImage;
         }
-        
+
         return null;
     }
 
