@@ -7,46 +7,23 @@
 
 
 <div class="gallery">
-    @foreach (var image in ImageUrls)
+    @foreach (var image in Images)
     {
-        <img src="@image" class="photo" />
+        <img src="@($"{ApiBaseUrl}{image.url}")" alt="@image.name" class="photo" />
     }
 </div>
 
 @code {
-    private readonly string[] ImageUrls = new[]
-    {
-        "https://picsum.photos/600/400",
-        "https://picsum.photos/400/600",
-        "https://picsum.photos/500/500",
-        "https://picsum.photos/700/500",
-        "https://picsum.photos/400/300",
-        "https://picsum.photos/500/700",
-        "https://picsum.photos/600/400",
-        "https://picsum.photos/400/600",
-        "https://picsum.photos/500/500",
-        "https://picsum.photos/700/500",
-        "https://picsum.photos/400/300",
-        "https://picsum.photos/500/700",
-        "https://picsum.photos/450/450",
-        "https://picsum.photos/300/400",
-        "https://picsum.photos/600/600",
-        "https://picsum.photos/500/350",
-        "https://picsum.photos/450/450",
-        "https://picsum.photos/300/400",
-        "https://picsum.photos/600/600",
-        "https://picsum.photos/500/350"
-    };
-
     private List<Image> Images = new();
+    private string ApiBaseUrl = string.Empty;
 
     [Inject] public HttpClient Http { get; set; } = default!;
     [Inject] public IConfiguration Configuration { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        var apiBaseUrl = Configuration["API_BASE_URL"] ?? "http://localhost:5050";
-        Http.BaseAddress = new Uri(apiBaseUrl);
+        ApiBaseUrl = Configuration["API_BASE_URL"] ?? "http://localhost:5050";
+        Http.BaseAddress = new Uri(ApiBaseUrl);
 
 
         await LoadImages();

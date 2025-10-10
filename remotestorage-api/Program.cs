@@ -17,6 +17,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");

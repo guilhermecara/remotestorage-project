@@ -12,6 +12,7 @@ services:
       - database
     environment:
       - IMAGE_DIR=/remotestorage-images
+      - FALLBACK_IMAGE_DIR=/home/guilherme/.remotestorage-images
     volumes:
       - /home/guilherme/.remotestorage-images:/remotestorage-images
   frontend:
