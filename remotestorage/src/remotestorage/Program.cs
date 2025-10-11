@@ -6,8 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL")
-                 ?? builder.Configuration["ApiSettings:BaseUrl"]; // defined in appsettings.json
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
+var apiBaseUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL")
+                 ?? builder.Configuration["API_BASE_URL"]; // defined in appsettings.json, fallback if no docker
 
 builder.Services.AddHttpClient("API", client =>
 {

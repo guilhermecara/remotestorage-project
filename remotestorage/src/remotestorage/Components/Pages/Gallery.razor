@@ -1,10 +1,11 @@
+@using Microsoft.Extensions.Configuration;
+
 @page "/images"
 
 @rendermode InteractiveServer
 
 
 <h1>Images</h1>
-
 
 <div class="gallery">
     @foreach (var image in Images)
@@ -15,6 +16,7 @@
 
 @code {
     private List<Image> Images = new();
+    private string ApiInternalUrl = string.Empty;
     private string ApiBaseUrl = string.Empty;
 
     [Inject] public HttpClient Http { get; set; } = default!;
@@ -22,9 +24,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        ApiBaseUrl = Configuration["API_BASE_URL"] ?? "http://localhost:5050";
-        Http.BaseAddress = new Uri(ApiBaseUrl);
+        ApiInternalUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
+        Http.BaseAddress = new Uri(ApiInternalUrl);
 
+        ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
 
         await LoadImages();
     }
