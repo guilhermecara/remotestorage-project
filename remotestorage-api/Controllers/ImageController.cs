@@ -48,15 +48,41 @@ public class ImageController : ControllerBase
 
     // POST action
 
+    // return CreatedAtAction(nameof(Get), new { id = Image.Id }, Image);
+
+    const int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
     [HttpPost]
-    public IActionResult Create(Image Image)
+    [RequestSizeLimit(MAX_FILE_SIZE)]
+
+    public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
     {
-        ImageService.Add(Image);
-        return CreatedAtAction(nameof(Get), new { id = Image.Id }, Image);
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Only image files are allowed.");
+
+        try
+        {
+            var newImage = await ImageService.Add(file);
+
+            if (newImage == null)
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save image.");
+
+            return Ok(new
+            {
+                message = "Image uploaded successfully",
+                image = newImage
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[UploadImage] Error: {ex.Message}");
+            return StatusCode(StatusCodes.Status500InternalServerError, $"Error uploading image: {ex.Message}");
+        }
     }
 
     // PUT action
-
 
 
     // DELETE action

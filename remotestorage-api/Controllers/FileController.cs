@@ -14,5 +14,4 @@ public class FileController : ControllerBase
         Console.WriteLine($"Tried accessing the image at path: {path}");
         return await FileService.StreamImage(path);
     }
-
 }

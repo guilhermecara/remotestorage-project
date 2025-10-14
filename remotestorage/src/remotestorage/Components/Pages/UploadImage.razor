@@ -1,6 +1,77 @@
+@inject HttpClient Http
 @page "/upload"
+@using System.Runtime.InteropServices
 
 @rendermode InteractiveServer
 
 <h1>Upload Image</h1>
 
+<InputFile OnChange="LoadFile" accept="image/*" />
+
+@code {
+    const int MAX_FILESIZE = 5000 * 1024; // 2 MB
+    public string FileName { get; set; } = "";
+    public long FileSize { get; set; }
+    public string FileType { get; set; } = "";
+    public DateTimeOffset LastModified { get; set; }
+    public string ErrorMessage { get; set; } = "";
+
+    private string ApiInternalUrl = string.Empty;
+    private string ApiBaseUrl = string.Empty;
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
+    protected override async Task OnInitializedAsync()
+    {
+        ApiInternalUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
+        Http.BaseAddress = new Uri(ApiInternalUrl);
+
+        ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
+    }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        IBrowserFile browserFile = e.File;
+        
+        if (browserFile.Size > MAX_FILESIZE)
+        {
+            Console.WriteLine("File is too large");
+            return;
+        }
+
+        FileSize = browserFile.Size;
+        FileType = browserFile.ContentType;
+        FileName = browserFile.Name;
+        LastModified = browserFile.LastModified;
+
+        try {
+             // Create multipart form data content
+            var content = new MultipartFormDataContent();
+            
+            // Convert file stream to StreamContent
+            var streamContent = new StreamContent(browserFile.OpenReadStream(MAX_FILESIZE));
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(browserFile.ContentType);
+
+            // Add the file to the form with the key name "image"
+            content.Add(streamContent, "file", browserFile.Name);
+
+            // POST to your API endpoint
+            string apiUrl = ApiBaseUrl + "/image";
+
+            var response = await Http.PostAsync(apiUrl, content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Upload successful: {responseBody}");
+            }
+            else
+            {
+                ErrorMessage = $"Upload failed ({response.StatusCode}): {await response.Content.ReadAsStringAsync()}";
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            return;
+        }
+    }
+}
