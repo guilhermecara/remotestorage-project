@@ -54,7 +54,7 @@
             content.Add(streamContent, "file", browserFile.Name);
 
             // POST to your API endpoint
-            string apiUrl = ApiBaseUrl + "/image";
+            string apiUrl = ApiInternalUrl + "/image";
 
             var response = await Http.PostAsync(apiUrl, content);
             if (response.IsSuccessStatusCode)
