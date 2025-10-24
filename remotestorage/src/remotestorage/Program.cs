@@ -19,6 +19,8 @@ builder.Services.AddHttpClient("API", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddScoped<UIState>(); // Adds monitoring for the UIState Service.
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
