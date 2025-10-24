@@ -38,12 +38,12 @@ main {
     background-color: var(--primary-color);
     justify-content: space-between;
     display: flex;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
     align-items: center;
-    padding-top: 40px;
-    padding-bottom: 20px;
+    padding: 0.75rem 1rem; /* Slightly reduced padding for mobile */
     border-bottom: 1.5px solid var(--border-color);
     border-radius: 10px;
-    flex-shrink: 0; 
+    flex-shrink: 0; /* Added - prevents topbar from shrinking */
 }
 
 .top-row-logo {
@@ -66,7 +66,9 @@ main {
     border-radius: 20px;
     background-color: var(--active-color);
     padding: 10px 16px;
-    flex: 0.7;
+    flex: 1;
+    max-width: 600px; /* Prevent searchbar from becoming too wide */
+    min-width: 200px; /* Ensure minimum usability on small screens */
 }
 
 .top-row-searchbar img {
@@ -136,6 +138,17 @@ main {
     
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
+    }
+
+    .content-navbar  {
+        display: none;
+    }
+
+    .top-row-settings {
+        display: none; /* Hide "Upload" label on mobile */
+    }
+    .top-row-logo {
+        display: none; /* Hide "Upload" label on mobile */
     }
 }
 

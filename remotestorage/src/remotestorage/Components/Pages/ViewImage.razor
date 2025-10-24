@@ -1,20 +1,19 @@
-@page "/image"
+@page "/image/{Id}"
 @inject UIState UI
 
-<h1>Hello!</h1>
-
-
+<h1>Image: @Id</h1>
 
 <style>
-
     h1 {
         text-align: center;
         font-size: 5rem;
     }
-
 </style>
 
 @code {
+    [Parameter]
+    public string? Id { get; set; } // Route parameter
+
     protected override void OnInitialized()
     {
         UI.ShowNavbar = false; 

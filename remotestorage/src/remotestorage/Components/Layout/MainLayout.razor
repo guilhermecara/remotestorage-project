@@ -32,11 +32,13 @@
         <div class="content">
             @if (UI.ShowNavbar)
             {
-                <nav class = "content-navbar">
-                    <NavMenu/>
+                <nav class="content-navbar@(UI.ShowNavbar ? "" : "-collapsed")">
+                    <NavMenu />
                 </nav>
             }
-            @Body
+            <div>
+                @Body
+            </div>
         </div>
     </main>
 </div>
@@ -46,8 +48,6 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
-
-
 
 @code { 
     protected override void OnInitialized()

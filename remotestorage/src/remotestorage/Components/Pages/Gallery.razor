@@ -4,13 +4,12 @@
 
 @rendermode InteractiveServer
 
-
-<h1>Images</h1>
-
 <div class="gallery">
     @foreach (var image in Images)
     {
-        <img src="@($"{ApiBaseUrl}{image.url}")" alt="@image.name" class="photo" />
+        <a href = "/image">
+            <img src="@($"{ApiBaseUrl}{image.url}")" alt="@image.name" class="photo" />
+        </a>
     }
 </div>
 
