@@ -1,14 +1,22 @@
-@using remotestorage.Components.Layout
 @page "/image"
-@layout EmptyLayout
+@inject UIState UI
 
 <h1>Hello!</h1>
 
+
+
 <style>
 
-h1 {
-    text-align: center;
-    font-size: 5rem;
-}
+    h1 {
+        text-align: center;
+        font-size: 5rem;
+    }
 
 </style>
+
+@code {
+    protected override void OnInitialized()
+    {
+        UI.ShowNavbar = false; 
+    }
+}

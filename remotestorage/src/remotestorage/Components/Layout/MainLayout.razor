@@ -13,7 +13,10 @@
             <div class="top-row-searchbar">
                 <label for="search-input"><img src="/images/search.svg"/></label>
                 <input type="text" placeholder="Search your photos" id ="search-input"/>
-                <img src="/images/menu.svg"/>
+
+                <a href = "/">
+                    <img src="/images/menu.svg"/>
+                </a>
             </div>
 
             <div class="top-row-settings">
@@ -27,16 +30,13 @@
         </div>
 
         <div class="content">
-            <nav class = "content-navbar">
-                @if (UI.ShowNavbar)
-                {
-                    <NavMenu />
-                }
-            </nav>
-
-            <div>
-                @Body
-            </div>
+            @if (UI.ShowNavbar)
+            {
+                <nav class = "content-navbar">
+                    <NavMenu/>
+                </nav>
+            }
+            @Body
         </div>
     </main>
 </div>
