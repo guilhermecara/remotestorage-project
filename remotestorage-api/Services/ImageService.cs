@@ -13,19 +13,28 @@ public static class ImageService
     {
         List<Image> imageData = new List<Image>();
 
-        await using var command = DatabaseService.CreateQuery("SELECT id, name, url FROM images");
-        await using var reader = await command.ExecuteReaderAsync();
-
-        while (await reader.ReadAsync())
+        try
         {
-            string relativeUrl = reader.GetString(2).TrimStart('/');
-            imageData.Add(new Image
+            await using var command = DatabaseService.CreateQuery("SELECT id, name, url FROM images");
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                Id = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Url = "/api/file/" + relativeUrl
-            });
+                string relativeUrl = reader.GetString(2).TrimStart('/');
+                imageData.Add(new Image
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Url = "/api/file/" + relativeUrl
+                });
+            }
         }
+        catch (Exception e)
+        {
+            Console.WriteLine("An exception has been found while loading the images: " + e);
+            Console.WriteLine("The probable cause is related to the databse connection.");
+        }
+
+        
 
         return imageData;
     }
