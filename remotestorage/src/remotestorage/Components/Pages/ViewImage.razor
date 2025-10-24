@@ -1,21 +1,41 @@
-@page "/image/{Id}"
-@inject UIState UI
+@page "/image/{*Url}"
+@using remotestorage.Models
+@rendermode InteractiveServer
 
-<h1>Image: @Id</h1>
+<h3>Image Viewer</h3>
 
-<style>
-    h1 {
-        text-align: center;
-        font-size: 5rem;
-    }
-</style>
+@if (!string.IsNullOrEmpty(ImageUrl))
+{
+    <img src="@ImageUrl" alt="Image" class="photo" />
+    <p>The ImageUrl is : @ImageUrl</p>
+}
+else
+{
+    <p>Image not found.</p>
+}
 
 @code {
     [Parameter]
-    public string? Id { get; set; } // Route parameter
+    public string? Url { get; set; }
+
+    private string ImageUrl = string.Empty;
+    private string ApiBaseUrl = string.Empty;
+
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
 
     protected override void OnInitialized()
     {
-        UI.ShowNavbar = false; 
+        ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
+
+        if (!string.IsNullOrEmpty(Url))
+        {
+            // Construct the full image URL
+            ImageUrl = $"{ApiBaseUrl}{Url}";
+            Console.WriteLine($"Image URL: {ImageUrl}");
+        }
+        else
+        {
+            Console.WriteLine("No image URL provided.");
+        }
     }
 }
