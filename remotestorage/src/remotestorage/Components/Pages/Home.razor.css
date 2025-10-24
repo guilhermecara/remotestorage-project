@@ -1,3 +1,38 @@
+.layout {
+    display: flex;       /* sidebar + page */
+    justify-content: center;
+    height: 30dvh;       /* full viewport height */
+    min-width: 100%;
+}
+
 .page {
-    
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+    padding-top: 20px;
+    gap: 300px;
+    box-sizing: border-box;
+}
+/* Left and right sections */
+.left-side, .right-side {
+    flex: 1;
+}
+
+/* Optional spacing */
+.left-side {
+    padding-right: 2rem;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
+
+h3 {
+    font-weight: normal;
+    color: #555;
+}
+
+p {
+    color: #666;
 }

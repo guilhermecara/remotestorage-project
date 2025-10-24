@@ -2,31 +2,32 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    margin: 0 2rem; 
-
+    height: 100vh; /* Added */
+    overflow: hidden; /* Added */
+    margin: 0 2rem;
     color-scheme: prefers-color-scheme;
-    
     background-color: var(--primary-color);
-
     --primary-color: var(--bs-white);
     --secondary-color: var(--bs-gray-200);
     --tertiary-color: var(--bs-black);
-
     --active-color: var(--bs-gray-400);
     --border-color: var(--bs-gray-300);
 }
 
 .dark-mode {
-   --primary-color: var(--bs-black);
+    --primary-color: var(--bs-black);
     --secondary-color: var(--bs-gray-200);
     --tertiary-color: var(--bs-white);
-
     --active-color: var(--bs-gray-400);
     --border-color: var(--bs-gray-300);
 }
 
 main {
     flex: 1;
+    display: flex; /* Added */
+    flex-direction: column; /* Added */
+    overflow: hidden; /* Added */
+    min-height: 0; /* Added - important for Firefox */
 }
 
 .sidebar {
@@ -38,138 +39,124 @@ main {
     justify-content: space-between;
     display: flex;
     align-items: center;
-
     padding-top: 40px;
     padding-bottom: 20px;
-
     border-bottom: 1.5px solid var(--border-color);
     border-radius: 10px;
-
+    flex-shrink: 0; /* Added - prevents topbar from shrinking */
 }
 
-    .top-row-logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1.5rem;
+.top-row-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+}
 
-        img {
-            height: 45px;   
-            width: auto;
-        }
-    }
+.top-row-logo img {
+    height: 45px;
+    width: auto;
+}
 
+.top-row-searchbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 20px;
+    border-radius: 20px;
+    background-color: var(--active-color);
+    padding: 10px 16px;
+    flex: 0.7;
+}
 
-    .top-row-searchbar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-right: 20px;
-        
-        border-radius: 20px;
-        background-color: var(--active-color);
+.top-row-searchbar img {
+    filter: invert(1) brightness(0);
+}
 
-        padding: 10px 16px;     /* increases height */
-        flex: 0.7;
+.top-row-searchbar input {
+    flex: 1;
+    border: none;
+    background-color: transparent;
+}
 
-        img {
-                filter: invert(1) brightness(0);
-        }
+.top-row-searchbar input:focus {
+    outline: none;
+}
 
-    }
-        .top-row-searchbar input {
-            flex: 1;
-            border: none;
-            background-color: transparent;
+.top-row-settings {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    gap: 32px;
+}
 
-            &:focus {
-                outline: none;
-            }
+.top-row-settings button {
+    background: none;
+    border: none;
+    padding: 0;
+}
 
-           
-        }
-        
-    .top-row-settings {
-        display: flex;
-        text-align: center;
-        align-items: center;
-        gap: 32px;
-
-
-        button {
-            background: none;
-            border: none;
-            padding: 0;
-        }
-
-        img {
-            filter: invert(1) brightness(0);
-            height: 32px;   
-            width: auto;
-            margin-left: 20px;
-        }
-    }
+.top-row-settings img {
+    filter: invert(1) brightness(0);
+    height: 32px;
+    width: auto;
+    margin-left: 20px;
+}
 
 .content {
     flex: 1;
     display: flex;
     gap: 1.5rem;
+    overflow: hidden; /* Added */
+    min-height: 0; /* Added - important for Firefox */
 }
+
 .content-navbar {
-    width: 200px; /* fixed width */
-    height: 100vh; /* fill remaining height after header */
+    width: 200px;
+    flex-shrink: 0; /* Changed from implicit to explicit */
+    overflow-y: auto; /* Changed from hidden to auto */
     color: white;
     padding: 20px;
     box-sizing: border-box;
 }
 
-/*
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-*/
+/* Added - wrapper for body content */
+.content > div {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
 
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;
     }
-
+    
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
     }
 }
 
-/* Is that the desktop configuration? I think so. */
-
-@media (min-width: 641px) { 
+@media (min-width: 641px) {
     .page {
         flex-direction: row;
     }
-
+    
     .sidebar {
         width: 250px;
         height: 100vh;
         position: sticky;
         top: 0;
     }
-
+    
     .top-row {
         position: sticky;
         top: 0;
         z-index: 1;
     }
-
+    
     .top-row, article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
@@ -180,7 +167,8 @@ a {
     color: var(--tertiary-color);
     text-decoration: none;
 }
-label{
+
+label {
     color: var(--tertiary-color);
 }
 
@@ -198,9 +186,9 @@ label{
     z-index: 1000;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
