@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using remotestorage_api.Models;
-using System;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic;
 using Microsoft.AspNetCore.Mvc;
+
+using MetadataExtractor;
+using MetadataExtractor.Formats.Exif;
 
 namespace remotestorage_api.Services;
 
@@ -35,24 +34,56 @@ public static class FileService
             return new NotFoundResult();
         }
     }
-    
-    public static async Task<Image> UploadImage (IFormFile file)
+
+    public static async Task<Models.Image> UploadImage(IFormFile file)
     {
+        // Validate the file
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("No file uploaded.");
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (ext is not (".jpg" or ".jpeg" or ".png" or ".gif" or ".webp"))
+            throw new ArgumentException("File type not allowed.");
+
+        // Ensure directory exists
+        if (!System.IO.Directory.Exists(imageDir))
+            System.IO.Directory.CreateDirectory(imageDir);
+
+        // Create a unique file name
         string fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
         string filePath = Path.Combine(imageDir, fileName);
-        
-        using (FileStream stream = new FileStream(filePath, FileMode.Create))
+
+        // Save file to disk
+        using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
-    
-        return new Image
+
+        // Default to current time
+        //DateTimeOffset postedDate = DateTimeOffset.UtcNow;
+        
+        // Read metadata using MetadataExtractor
+        IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
+
+         // Try to extract EXIF DateTimeOriginal
+        var subIfdDirectory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+        var dateTime = subIfdDirectory?.GetDescription(ExifDirectoryBase.TagDateTimeOriginal);
+
+        Console.WriteLine("subIfdDirectory is : ");
+        Console.WriteLine(subIfdDirectory);
+
+        Console.WriteLine("Date time of the image is : ");
+        Console.WriteLine(dateTime);
+
+        // Return your image model
+        return new Models.Image
         {
             Name = fileName,
-            Url = fileName // Store only the relative path, not the full URL, Will add more functionality once I add a system for users.
+            Url = fileName, // relative path or to be prefixed later
+            
         };
     }
-    
+
     private static string GetMimeType(string extension)
     {
         return extension.ToLowerInvariant() switch

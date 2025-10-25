@@ -61,30 +61,27 @@ public static class ImageService
 
     public static async Task<Image?> Add(IFormFile file)
     {
+        // Validate file
         if (file == null || file.Length == 0)
             throw new ArgumentException("No file uploaded.");
 
+        // Save to disk
         Image uploadedImage = await FileService.UploadImage(file);
         if (uploadedImage == null)
             return null;
-
-        var newImage = new Image
-        {
-            Name = uploadedImage.Name,
-            Url = uploadedImage.Url
-        };
-
+        
+        //Save it into the database.
         await using var command = DatabaseService.CreateQuery(
             "INSERT INTO images (name, url) VALUES (@name, @url) RETURNING id;"
         );
-        command.Parameters.AddWithValue("name", newImage.Name);
-        command.Parameters.AddWithValue("url", newImage.Url);
+        command.Parameters.AddWithValue("name", uploadedImage.Name);
+        command.Parameters.AddWithValue("url", uploadedImage.Url);
 
         var result = await command.ExecuteScalarAsync(); 
         if (result is int id)
         {
-            newImage.Id = id;
-            return newImage;
+            uploadedImage.Id = id;
+            return uploadedImage;
         }
 
         return null;
