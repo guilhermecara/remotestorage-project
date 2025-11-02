@@ -1,4 +1,4 @@
-@page "/login"
+@page "/register"
 @using System.Reflection.Metadata
 @using remotestorage.Components.Layout
 @layout EmptyLayout
@@ -6,13 +6,13 @@
 
 <div class="page-wrapper">
 
-    <div class="login-container">
+    <div class="register-container">
         <div class="top-row-logo">
             <img src="/images/logo.png" class="logo-img"/>
             <span>GuiFotos™</span>
         </div>
 
-        <div class="login-form">
+        <div class="register-form">
             <h1>Log in</h1>
             
             <form method="post">
@@ -36,10 +36,21 @@
                     </div>
                 </div>
 
+                <div class="input-option password-field">
+                    <label for="password-id">Confirm password:</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="@(hiddenPassword ? "password" : "text")"
+                            class="input-box" 
+                            placeholder="Enter your password" 
+                            id="password-id"
+                        />
+                    </div>
+                </div>
                 
-                <button type="submit" class="submit-button">Log in</button>    
+                <button type="submit" class="submit-button">Register</button>    
 
-                <p>Don't have an account? <a href="/register">Click here</a></p>
+                <p>Want to log in? <a href="/login">Click here</a></p>
             </form>
         </div>
     </div> 
