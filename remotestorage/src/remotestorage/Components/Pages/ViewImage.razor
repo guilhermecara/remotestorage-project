@@ -30,8 +30,7 @@ else
         if (!string.IsNullOrEmpty(Url))
         {
             // Construct the full image URL
-            ImageUrl = $"{ApiBaseUrl}{Url}";
-            Console.WriteLine($"Image URL: {ImageUrl}");
+            ImageUrl = $"{ApiBaseUrl}{Url}?mode=lossless";
         }
         else
         {
