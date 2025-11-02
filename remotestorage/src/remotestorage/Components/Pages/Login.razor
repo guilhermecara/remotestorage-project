@@ -1,0 +1,53 @@
+@page "/login"
+@using System.Reflection.Metadata
+@using remotestorage.Components.Layout
+@layout EmptyLayout
+@rendermode InteractiveServer
+
+<div class="page-wrapper">
+
+    <div class="login-container">
+        <div class="top-row-logo">
+            <img src="/images/logo.png" class="logo-img"/>
+            <span>GuiFotos™</span>
+        </div>
+
+        <div class="login-form">
+            <h1>Log in</h1>
+            
+            <form method="post">
+                <div class="input-option">
+                    <label for = "username-id">Username: </label>
+                    <input type="text" class="input-box" placeholder="Enter your username" id = "username-id"/>
+                </div>
+
+                <div class="input-option password-field">
+                    <label for="password-id">Password:</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="@(hiddenPassword ? "password" : "text")"
+                            class="input-box" 
+                            placeholder="Enter your password" 
+                            id="password-id"
+                        />
+                        <button type="button" class="toggle-password" @onclick="OnTogglePassword">
+                            @(hiddenPassword ? "Show" : "Hide")
+                        </button>
+                    </div>
+                </div>
+
+                
+                <button type="submit" class="submit-button">Log in</button>    
+
+                <p>Don't have an account? <a href="">Click here</a></p>
+            </form>
+        </div>
+    </div> 
+</div>
+
+@code {
+    bool hiddenPassword = true;
+    private void OnTogglePassword () {
+        hiddenPassword = !hiddenPassword;
+    }
+}
