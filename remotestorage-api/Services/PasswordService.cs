@@ -30,7 +30,8 @@ namespace remotestorage_api.Services
         {
             try
             {
-                return BCrypt.Verify(password, hash);
+                string shaHashedPassword = Sha256HashString(password);
+                return BCrypt.Verify(shaHashedPassword, hash);
             }
             catch (Exception ex)
             {
