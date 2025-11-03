@@ -53,4 +53,9 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 app.MapControllers();
 
+string hashPass = PasswordService.HashPassword("Hello bro");
+Console.WriteLine("Hashed password is: ");
+Console.WriteLine(hashPass);
+
+
 app.Run("http://0.0.0.0:5050");  // Listen on all interfaces
