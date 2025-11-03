@@ -52,12 +52,12 @@ public class AuthController : ControllerBase
         User? fetchedUser = await DatabaseService.FetchUser(request.Username);
         if (fetchedUser == null)
         {
-            return NotFound(new { message = "Invalid username." });
+            return Conflict(new { message = "Invalid username or password." });
         }
 
         if (!PasswordService.VerifyPassword(request.Password,fetchedUser.PasswordHash))
         {
-            return BadRequest(new { message = "Invalid password." });
+            return Conflict(new { message = "Invalid password or password." });
         }
 
         return Ok(); // Probably return a generated cookie or something? I dont know
