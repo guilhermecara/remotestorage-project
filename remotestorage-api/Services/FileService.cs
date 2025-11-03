@@ -96,7 +96,8 @@ public static class FileService
             System.IO.Directory.CreateDirectory(imageDir);
 
         // Create a unique file name
-        string fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+        
+        string fileName = Path.GetFileNameWithoutExtension(file.FileName) + "-" + GUIDService.GenerateGuidString() + Path.GetExtension(file.FileName);
         string filePath = Path.Combine(imageDir, fileName);
 
         // Save file to disk
