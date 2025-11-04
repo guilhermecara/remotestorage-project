@@ -8,7 +8,14 @@ namespace remotestorage_api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
-{
+{   
+
+    private readonly JwtService _jwtService;
+    public AuthController(JwtService jwtService)
+    {
+        _jwtService = jwtService;
+    }
+
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
@@ -55,12 +62,21 @@ public class AuthController : ControllerBase
             return Conflict(new { message = "Invalid username or password." });
         }
 
-        if (!PasswordService.VerifyPassword(request.Password,fetchedUser.PasswordHash))
+        if (!PasswordService.VerifyPassword(request.Password, fetchedUser.PasswordHash))
         {
             return Conflict(new { message = "Invalid password or password." });
         }
 
-        return Ok(); // Probably return a generated cookie or something? I dont know
-
+        try
+        {
+            var token = _jwtService.GenerateToken(request.Username);
+            Console.WriteLine("Token is");
+            Console.WriteLine(token);
+            return Ok(new { token });
+        }
+            catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }       
     }
 }

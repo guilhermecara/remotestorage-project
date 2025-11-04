@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using remotestorage_api.Services;
@@ -5,6 +6,8 @@ using remotestorage_api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
+
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddControllers();
 
 // CORS for frontend
@@ -23,26 +26,19 @@ builder.Services.AddCors(options =>
 
 // JWT Authentication
 
-
-/* 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
     {
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-
-
-    };
-});
-*/
+        // This is where validation happens
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])
+            ),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+        };
+    });;
 
 builder.Services.AddHttpContextAccessor();
 
@@ -50,10 +46,8 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-
-
 
 app.Run("http://0.0.0.0:5050");  // Listen on all interfaces
