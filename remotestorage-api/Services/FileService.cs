@@ -16,6 +16,23 @@ public static class FileService
 
     static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? Environment.GetEnvironmentVariable("FALLBACK_IMAGE_DIR");
 
+    private static async Task<MemoryStream> CachePerformanceImage(IFormFile file)
+    {
+        const int IMAGE_QUALITY = 60;
+
+        using var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream());
+        var imageStream = new MemoryStream();
+
+        await image.SaveAsync(imageStream, new WebpEncoder
+        {
+            Quality = IMAGE_QUALITY
+        });
+
+        imageStream.Position = 0;
+
+        return imageStream;
+    }
+
     public static async Task<MemoryStream> ProcessPerformanceImage(string imagePath)
     {
         const int MAX_WIDTH = 1920;
@@ -100,11 +117,27 @@ public static class FileService
         string fileName = Path.GetFileNameWithoutExtension(file.FileName) + "-" + GUIDService.GenerateGuidString() + Path.GetExtension(file.FileName);
         string filePath = Path.Combine(imageDir, fileName);
 
-        // Save file to disk
+        // Save original file to disk
+
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
             await file.CopyToAsync(stream);
         }
+
+        // Save low-res version of image to disk.
+
+        MemoryStream lowResImageStream = await CachePerformanceImage(file);
+
+        using (var stream = new FileStream(filePath + "-lowres.webp", FileMode.Create))
+        {
+            await file.CopyToAsync(lowResImageStream);
+        }
+        
+        using (var outputStream = new FileStream(filePath + "-lowres.webp", FileMode.Create))
+        {
+            await lowResImageStream.CopyToAsync(outputStream);
+        }
+
 
         // Default to current time
         //DateTimeOffset postedDate = DateTimeOffset.UtcNow;

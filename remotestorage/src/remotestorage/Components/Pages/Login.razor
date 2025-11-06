@@ -45,6 +45,7 @@
                     <p>@errorMessage</p>
                 }
                 
+                <p>@TestString</p>
             </form>
         </div>
     </div> 
@@ -62,6 +63,8 @@
     private string username = string.Empty;
     private string password = string.Empty;
     private string? errorMessage = null;
+
+    public string TestString = "";
 
     protected override void OnInitialized()
     {
@@ -92,6 +95,7 @@
 
             if (response.IsSuccessStatusCode)
             {
+                TestString = response.Content.ToString();
                 Navigation.NavigateTo("/");
                 return;
             }
