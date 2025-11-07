@@ -1,8 +1,10 @@
 @using Microsoft.Extensions.Configuration;
 @using remotestorage.Models;
+@using Microsoft.AspNetCore.Authorization
 
 @page "/images"
 
+@attribute [Authorize]
 @rendermode InteractiveServer
 
 <div class="gallery">

@@ -107,7 +107,8 @@
                 Models.TokenResponse? json = await response.Content.ReadFromJsonAsync<Models.TokenResponse>();
                 var sessionToken = json?.Token;
 
-                await JwtService.SaveTokenAsync(sessionToken);
+                if (sessionToken != null)
+                    await JwtService.SaveTokenAsync(sessionToken);
 
                 return;
             }

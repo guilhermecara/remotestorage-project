@@ -1,6 +1,9 @@
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
 using remotestorage.Components;
-using remotestorage.Services;
+using remotestorage.AuthenticationService;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,17 @@ builder.Configuration
 var apiBaseUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL")
                  ?? builder.Configuration["API_BASE_URL"]; // defined in appsettings.json, fallback if no docker
 
+// Services
+builder.Services.AddScoped<UIState>();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<ProtectedLocalStorage>();
+builder.Services.AddScoped<JwtService>();
+
+// Register authentication provider
+builder.Services.AddAuthenticationCore();
+builder.Services.AddAuthenticationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, LocalStorageAuthStateProvider>();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -20,13 +34,10 @@ builder.Services.AddHttpClient("API", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-builder.Services.AddScoped<UIState>();
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -35,8 +46,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
