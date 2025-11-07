@@ -7,4 +7,4 @@ packagesobj/
 obj/
 bin/
 *.log
-.vscode
+*.vscode
