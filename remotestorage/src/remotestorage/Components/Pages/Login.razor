@@ -4,6 +4,10 @@
 @layout EmptyLayout
 @rendermode InteractiveServer
 
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+@inject AuthenticationService.JwtService JwtService
+
 <div class="page-wrapper">
 
     <div class="login-container">
@@ -44,8 +48,6 @@
                 @if(!String.IsNullOrEmpty(errorMessage)) {
                     <p>@errorMessage</p>
                 }
-                
-                <p>@TestString</p>
             </form>
         </div>
     </div> 
@@ -64,8 +66,6 @@
     private string password = string.Empty;
     private string? errorMessage = null;
 
-    public string TestString = "";
-
     protected override void OnInitialized()
     {
         ApiUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
@@ -74,6 +74,11 @@
 
     private void OnTogglePassword () {
         hiddenPassword = !hiddenPassword;
+    }
+
+    private async Task LogMessage(string msg)
+    {
+        await JSRuntime.InvokeVoidAsync("console.log", msg);
     }
 
     private async Task OnSubmitLoginForm (EventArgs e) 
@@ -95,8 +100,15 @@
 
             if (response.IsSuccessStatusCode)
             {
-                TestString = response.Content.ToString();
-                Navigation.NavigateTo("/");
+                string ContentString = await response.Content.ReadAsStringAsync();
+                
+                await LogMessage(ContentString);
+
+                Models.TokenResponse? json = await response.Content.ReadFromJsonAsync<Models.TokenResponse>();
+                var sessionToken = json?.Token;
+
+                await JwtService.SaveTokenAsync(sessionToken);
+
                 return;
             }
 
@@ -175,4 +187,6 @@
         }
     }
 
+
+    
 }

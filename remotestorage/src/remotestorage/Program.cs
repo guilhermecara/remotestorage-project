@@ -1,10 +1,8 @@
+using Blazored.LocalStorage;
 using remotestorage.Components;
+using remotestorage.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
 
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -14,12 +12,17 @@ builder.Configuration
 var apiBaseUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL")
                  ?? builder.Configuration["API_BASE_URL"]; // defined in appsettings.json, fallback if no docker
 
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+
 builder.Services.AddHttpClient("API", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-builder.Services.AddScoped<UIState>(); // Adds monitoring for the UIState Service.
+builder.Services.AddScoped<UIState>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
