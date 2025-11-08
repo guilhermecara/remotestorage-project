@@ -29,7 +29,7 @@ namespace remotestorage_api.Services
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(_configuration["Jwt:ExpirationMinutes"])),
+                    int.Parse(_configuration["Jwt:ExpiryInMinutes"])),
                 signingCredentials: credentials
             );
 

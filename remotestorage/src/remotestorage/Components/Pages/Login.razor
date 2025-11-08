@@ -5,8 +5,8 @@
 @rendermode InteractiveServer
 
 @inject IJSRuntime JSRuntime
-@inject Blazored.LocalStorage.ILocalStorageService localStore
 @inject AuthenticationService.JwtService JwtService
+@inject IHttpClientFactory HttpFactory
 
 <div class="page-wrapper">
 
@@ -81,59 +81,44 @@
         await JSRuntime.InvokeVoidAsync("console.log", msg);
     }
 
-    private async Task OnSubmitLoginForm (EventArgs e) 
+    private async Task OnSubmitLoginForm()
+{
+    isLoading = true;
+    errorMessage = null;
+
+    try
     {
-        errorMessage = null;
+        var serverUrl = Navigation.BaseUri.TrimEnd('/');
+        var client = HttpFactory.CreateClient("API");
 
-        if (!ValidateForm())
+        var response = await client.PostAsJsonAsync($"{serverUrl}/auth/set-cookie", new
         {
-            return;
-        }
+            username,
+            password
+        });
 
-        try 
+        if (response.IsSuccessStatusCode)
         {
-            HttpResponseMessage? response = await Http.PostAsJsonAsync("api/auth/login", new
-            {
-                username,
-                password
-            });
-
-            if (response.IsSuccessStatusCode)
-            {
-                string ContentString = await response.Content.ReadAsStringAsync();
-                
-                await LogMessage(ContentString);
-
-                Models.TokenResponse? json = await response.Content.ReadFromJsonAsync<Models.TokenResponse>();
-                var sessionToken = json?.Token;
-
-                if (sessionToken != null)
-                    await JwtService.SaveTokenAsync(sessionToken);
-
-                return;
-            }
-
-            await HandleErrorResponse(response);
+            Navigation.NavigateTo("/images", forceLoad: true);
         }
-        catch (HttpRequestException ex)
+        else
         {
-            errorMessage = "Unable to connect to server.";
-            Console.WriteLine($"HTTP Request Error: {ex.Message}");
+            errorMessage = "Usuário ou senha inválidos.";
         }
-        catch (Exception ex)
-        {
-            errorMessage = "An unexpected error occurred.";
-            Console.WriteLine($"Error during registration: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-
     }
+    catch (Exception ex)
+    {
+        errorMessage = "Erro de conexão.";
+        Console.WriteLine(ex);
+    }
+    finally
+    {
+        isLoading = false;
+        StateHasChanged();
+    }
+}
 
-    private bool ValidateForm()
+    private bool IsValidLoginForm()
     {
         // Check if fields are empty
         if (string.IsNullOrWhiteSpace(username))
