@@ -81,42 +81,50 @@
         await JSRuntime.InvokeVoidAsync("console.log", msg);
     }
 
-    private async Task OnSubmitLoginForm()
-{
-    isLoading = true;
-    errorMessage = null;
-
-    try
+    private async Task OnSubmitLoginForm (EventArgs e) 
     {
-        var serverUrl = Navigation.BaseUri.TrimEnd('/');
-        var client = HttpFactory.CreateClient("API");
+        errorMessage = null;
 
-        var response = await client.PostAsJsonAsync($"{serverUrl}/auth/set-cookie", new
+        if (!IsValidLoginForm())
         {
-            username,
-            password
-        });
-
-        if (response.IsSuccessStatusCode)
-        {
-            Navigation.NavigateTo("/images", forceLoad: true);
+            return;
         }
-        else
+
+        try
         {
-            errorMessage = "Usuário ou senha inválidos.";
+            var serverUrl = Navigation.BaseUri.TrimEnd('/');
+             HttpClient client = HttpFactory.CreateClient();
+            var response = await client.PostAsJsonAsync($"{serverUrl}/auth/set-cookie", new
+            {
+                username,
+                password
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = $"Erro ao autenticar: {response.StatusCode}";
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = "Unable to connect to server.";
+            Console.WriteLine($"HTTP Request Error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An unexpected error occurred.";
+            Console.WriteLine($"Error during registration: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
         }
     }
-    catch (Exception ex)
-    {
-        errorMessage = "Erro de conexão.";
-        Console.WriteLine(ex);
-    }
-    finally
-    {
-        isLoading = false;
-        StateHasChanged();
-    }
-}
 
     private bool IsValidLoginForm()
     {

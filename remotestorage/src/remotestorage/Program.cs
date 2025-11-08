@@ -17,7 +17,6 @@ using Microsoft.Extensions.Http;          // ← se estiver configurando HttpCli
 using Microsoft.Extensions.DependencyInjection; // ← para AddHttpClient / CreateClient
 
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Config
@@ -33,6 +32,7 @@ var apiBaseUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL")
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UIState>();
+builder.Services.AddHttpContextAccessor();
 
 // === Authentication ===
 
@@ -123,29 +123,18 @@ app.MapPost("/auth/set-cookie", async (HttpContext ctx, IHttpClientFactory httpF
     var token = json?.Token;
     if (string.IsNullOrEmpty(token)) return Results.Unauthorized();
 
-    var handler = new JwtSecurityTokenHandler();
-    var key = Encoding.UTF8.GetBytes(config["Jwt:SecretKey"]!);
-
-    var principal = handler.ValidateToken(token, new TokenValidationParameters
+    var cookieOptions = new CookieOptions
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    }, out _);
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTimeOffset.UtcNow.AddHours(12),
+        IsEssential = true // opcional, evita bloqueio por consentimento
+    };
 
-    await ctx.SignInAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        principal,
-        new AuthenticationProperties
-        {
-            IsPersistent = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(12)
-        });
+    ctx.Response.Cookies.Append("AuthToken", token, cookieOptions);
 
-    return Results.Ok();
+    return Results.Ok(new { Message = "Auth cookie set successfully." });
 })
 .WithName("SetAuthCookie");
 

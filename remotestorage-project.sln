@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "remotestorage.Tests", "remo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "remotestorage-api", "remotestorage-api\remotestorage-api.csproj", "{3A9FA6E0-1272-4A0D-B6B0-9A9C2A29846B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "blazor-cookies-test", "..\blazor-cookies-test\blazor-cookies-test\blazor-cookies-test.csproj", "{BCFFC8F0-6869-48CB-A5B7-9215CD3F07CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{3A9FA6E0-1272-4A0D-B6B0-9A9C2A29846B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A9FA6E0-1272-4A0D-B6B0-9A9C2A29846B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A9FA6E0-1272-4A0D-B6B0-9A9C2A29846B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCFFC8F0-6869-48CB-A5B7-9215CD3F07CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCFFC8F0-6869-48CB-A5B7-9215CD3F07CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCFFC8F0-6869-48CB-A5B7-9215CD3F07CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCFFC8F0-6869-48CB-A5B7-9215CD3F07CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C882A0D7-1E97-49E7-9937-B57D709CD849} = {6F9A884B-2814-41FE-A058-E6B2E5A183B6}
