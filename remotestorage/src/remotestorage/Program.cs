@@ -56,35 +56,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                var accessToken = context.Request.Query["auth_token"];
-
-                // SignalR connection
-                var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/_blazor") ||
-                    path.StartsWithSegments("/negotiate"))
-                {
-                    context.Token = accessToken;
-                }
+                var token = context.Request.Cookies["auth_token"];  // your cookie name
+                if (!string.IsNullOrEmpty(token))
+                    context.Token = token;
                 return Task.CompletedTask;
             }
         };
     });
-    
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-
-    /*
-    .AddCookie(options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None; // for local HTTP
-        options.Cookie.Path = "/"; // 👈 ensure it's visible to the whole app
-        options.LoginPath = "/login";
-    });
-    */
-
 builder.Services.AddAuthorization();
 
 builder.Services.AddCascadingAuthenticationState();
@@ -108,9 +86,6 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 
 /*
@@ -166,6 +141,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+/*
 app.Use(async (context, next) =>
 {
     // Log cookies to verify
@@ -173,11 +149,13 @@ app.Use(async (context, next) =>
     Console.WriteLine($"Incoming cookies: {cookies}");
     await next();
 });
-
+*/
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapBlazorHub().RequireAuthorization();
 
 app.Run();
