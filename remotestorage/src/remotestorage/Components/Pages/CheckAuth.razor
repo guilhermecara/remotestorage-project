@@ -4,15 +4,6 @@
 
 <h3>Status de Autenticação</h3>
 
-@if (isAuthenticated)
-{
-    <p>Usuário autenticado: @userName</p>
-}
-else
-{
-    <p>Não autenticado</p>
-}
-
 @code {
     private bool isAuthenticated;
     private string userName = "";

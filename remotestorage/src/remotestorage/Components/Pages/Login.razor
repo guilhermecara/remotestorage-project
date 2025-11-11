@@ -108,6 +108,7 @@
                     var simpleCookie = $"auth_token={responseContent.Token}; path=/; SameSite=Strict";
                     await JSRuntime.InvokeVoidAsync("eval", 
                         $"document.cookie = '{simpleCookie}'");
+                    await LogMessage("Tried to make token!");
                 }
 
                 Navigation.NavigateTo("/", forceLoad: true);

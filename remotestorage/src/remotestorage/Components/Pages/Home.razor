@@ -1,4 +1,15 @@
-﻿@page "/"
+﻿@using Microsoft.AspNetCore.Authorization;
+@using System.Reflection.Metadata
+@using remotestorage.Components.Layout
+@using remotestorage.Models
+
+@attribute [Authorize]
+
+@layout MainLayout
+@rendermode InteractiveServer
+
+@page "/"
+
 <PageTitle>Home</PageTitle>
 
 <div class="layout">
@@ -6,6 +17,7 @@
         <div class="left-side">
             <h1>Welcome back</h1>
             <h3>Your photos are waiting for you — just a click away!</h3>
+            <button @onclick="Activate">Go to bad route</button>
         </div>
 
         <div class="right-side">
@@ -13,3 +25,11 @@
         </div>
     </div>
 </div>
+
+@code {
+    [Inject] private NavigationManager nav { get; set; } = default!;
+
+    public async Task Activate () {
+        nav.NavigateTo("/porra");
+    }
+}

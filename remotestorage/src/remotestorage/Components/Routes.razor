@@ -1,39 +1,25 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Authorization
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <CascadingAuthenticationState>
+            <AuthorizeRouteView RouteData="@routeData"
+                                DefaultLayout="@typeof(Layout.MainLayout)">
                 <NotAuthorized>
-                    @* If user is NOT logged in → send to login *@
-                    @if (!context.User.Identity?.IsAuthenticated ?? false)
-                    {
-                        <RedirectToLogin />
-                    }
-                    @* If user IS logged in but lacks permission (role/policy) → show access denied *@
-                    else
-                    {
-                        <h3>Access Denied</h3>
-                        <p>You don't have permission to view this page.</p>
-                        <a href="/">Go home</a>
-                        <a href="/">Logout</a>
-                    }
+                    <RedirectToLogin />
                 </NotAuthorized>
 
                 <Authorizing>
-                    <div style="text-align:center; padding: 2rem;">
+                    <div class="p-4 text-center">
                         <p>Authenticating...</p>
                     </div>
                 </Authorizing>
             </AuthorizeRouteView>
-        </Found>
+        </CascadingAuthenticationState>
+    </Found>
 
-        <NotFound>
-            <LayoutView Layout="@typeof(Layout.MainLayout)">
-                <h3>Page Not Found</h3>
-                <p>Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
+    <NotFound>
+        <remotestorage.Components.Pages.NotFoundPage />
+    </NotFound>
+</Router>
