@@ -17,7 +17,6 @@ var apiBaseUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL")
                  ?? builder.Configuration["API_BASE_URL"];
 
 // === SERVICES ===
-builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UIState>();
 builder.Services.AddHttpContextAccessor();
@@ -43,6 +42,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var token = context.Request.Cookies["auth_token"];
                 if (!string.IsNullOrEmpty(token))
                     context.Token = token;
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.Redirect("/login");
                 return Task.CompletedTask;
             }
         };
@@ -75,21 +80,18 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 app.UseStatusCodePages(async context =>
 {
     var response = context.HttpContext.Response;
     switch (response.StatusCode)
     {
-        case 401:
-            response.Redirect("/login");
-            break;
         case 404:
-            response.Redirect("/NotFound");
+            response.Redirect("/notfound");
             break;
     }
 });
@@ -97,7 +99,5 @@ app.UseStatusCodePages(async context =>
 // === BLAZOR MAP ===
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-
 
 app.Run();

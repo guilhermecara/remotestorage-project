@@ -1,11 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using remotestorage.Components
 
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <CascadingAuthenticationState>
             <AuthorizeRouteView RouteData="@routeData"
-                                DefaultLayout="@typeof(Layout.MainLayout)">
+                DefaultLayout="@typeof(Layout.MainLayout)">
                 <NotAuthorized>
                     <RedirectToLogin />
                 </NotAuthorized>
@@ -20,6 +21,8 @@
     </Found>
 
     <NotFound>
-        <remotestorage.Components.Pages.NotFoundPage />
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
+            <p class="p-4 text-center">Sorry, the page could not be found.</p>
+        </LayoutView>
     </NotFound>
 </Router>
