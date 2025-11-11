@@ -131,6 +131,11 @@ main {
     min-height: 0;
 }
 
+.logout-button {
+    color: var(--bs-red);
+    text-decoration: underline;
+}
+
 @media (max-width: 640.98px) {
     .top-row {
         justify-content: space-between;

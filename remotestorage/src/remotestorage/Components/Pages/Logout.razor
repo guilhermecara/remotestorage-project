@@ -1,0 +1,13 @@
+@page "/logout"
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Nav
+
+@code {
+    protected override void OnInitialized()
+    {
+        var context = HttpContextAccessor.HttpContext;
+        context?.Response.Cookies.Delete("auth_token");
+
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
+}
