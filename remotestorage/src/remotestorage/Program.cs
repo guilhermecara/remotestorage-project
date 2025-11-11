@@ -36,36 +36,45 @@ builder.Services.AddHttpContextAccessor();
 
 // === Authentication ===
 
-/*
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-
-    .AddCookie(options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None; // MAKE ALWAYS WHEN HTTPS IS IMPLEMENTED!
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.LoginPath = "/login";
-    })
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = apiBaseUrl,          
+            ValidAudience = builder.Configuration["Jwt:Audience"],      
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)
-            )
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+        };
+
+        // Important for Blazor Server: pass token via SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["auth_token"];
+
+                // SignalR connection
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/_blazor") ||
+                    path.StartsWithSegments("/negotiate"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
-*/
-
+    
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+
+    /*
     .AddCookie(options =>
     {
         options.Cookie.HttpOnly = true;
@@ -74,6 +83,7 @@ builder.Services
         options.Cookie.Path = "/"; // 👈 ensure it's visible to the whole app
         options.LoginPath = "/login";
     });
+    */
 
 builder.Services.AddAuthorization();
 
@@ -103,7 +113,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-
+/*
 // 3. Endpoint de login (CORRETO)
 app.MapPost("/auth/set-cookie", async (HttpContext ctx, IHttpClientFactory httpFactory, IConfiguration config) =>
 {
@@ -150,7 +160,7 @@ app.MapGet("/auth/whoami", (HttpContext ctx) =>
         return Results.Ok(new { user = ctx.User.Identity.Name });
     return Results.Unauthorized();
 });
-
+*/
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
