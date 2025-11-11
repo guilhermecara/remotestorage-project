@@ -14,7 +14,7 @@ public class AuthController : ControllerBase
     public AuthController(JwtService jwtService)
     {
         _jwtService = jwtService;
-    }
+    }   
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
