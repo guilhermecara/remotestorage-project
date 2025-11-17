@@ -35,7 +35,6 @@ namespace remotestorage_api.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An exception has occurred: " + ex);
                 return false;
             }
         }

@@ -120,8 +120,6 @@
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"Upload successful: {responseBody}");
-                // Reset after successful upload
                 FileName = "";
                 FileSize = 0;
                 FileType = "";

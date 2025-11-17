@@ -121,12 +121,10 @@
         catch (HttpRequestException ex)
         {
             errorMessage = "Unable to connect to server.";
-            Console.WriteLine($"HTTP Request Error: {ex.Message}");
         }
         catch (Exception ex)
         {
             errorMessage = "An unexpected error occurred.";
-            Console.WriteLine($"Error during registration: {ex.Message}");
         }
         finally
         {

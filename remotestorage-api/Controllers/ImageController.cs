@@ -61,7 +61,6 @@ public class ImageController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[UploadImage] Error: {ex.Message}");
             return StatusCode(StatusCodes.Status500InternalServerError, $"Error uploading image: {ex.Message}");
         }
     }

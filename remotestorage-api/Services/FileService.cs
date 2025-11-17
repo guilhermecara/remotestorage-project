@@ -81,7 +81,6 @@ public static class FileService
 
         if (!System.IO.File.Exists(safePath))
         {
-            Console.WriteLine($"Warning: Image file not found at path {safePath}");
             return new NotFoundResult();
         }
 
@@ -148,12 +147,6 @@ public static class FileService
         // Try to extract EXIF DateTimeOriginal
         var subIfdDirectory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
         var dateTime = subIfdDirectory?.GetDescription(ExifDirectoryBase.TagDateTimeOriginal);
-
-        Console.WriteLine("subIfdDirectory is : ");
-        Console.WriteLine(subIfdDirectory);
-
-        Console.WriteLine("Date time of the image is : ");
-        Console.WriteLine(dateTime);
 
         // Return your image model
         return new Models.Image

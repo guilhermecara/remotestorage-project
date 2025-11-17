@@ -45,20 +45,15 @@
             
             Images = await client.GetFromJsonAsync<List<Image>>("image")
             ?? new List<Image>();
-            
-            Console.WriteLine($"Loaded {Images.Count} images.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading images: {ex.Message}");
             Images = new List<Image>();
         }
     }
 
     private async Task DeleteImage(int id)
     {
-        Console.WriteLine($"Delete clicked for image {id}");
-
         try
         {
             var response = await Http.DeleteAsync($"image/{id}");
@@ -71,17 +66,10 @@
                     Images.Remove(img);
                     StateHasChanged();
                 }
-
-                Console.WriteLine($"Image {id} deleted successfully.");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to delete image {id}: {response.StatusCode}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error deleting image {id}: {ex.Message}");
         }
     }
 

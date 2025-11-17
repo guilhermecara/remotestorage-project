@@ -30,8 +30,6 @@ public static class ImageService
         }
         catch (Exception e)
         {
-            Console.WriteLine("An exception has been found while loading the images: " + e);
-            Console.WriteLine("The probable cause is related to the databse connection.");
         }
 
         
@@ -95,8 +93,6 @@ public static class ImageService
             NpgsqlCommand command = DatabaseService.CreateQuery("DELETE FROM images WHERE id = @id");
             command.Parameters.AddWithValue("id", id);
             await command.ExecuteReaderAsync();
-
-            Console.WriteLine("Image deleted successfully");
         }
     }
 

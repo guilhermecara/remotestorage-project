@@ -88,23 +88,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-app.Use(async (context, next) =>
-{
-    var token = context.Request.Cookies["auth_token"];
-    var user = context.User.Identity;
-
-    Console.WriteLine("=== AUTH DEBUG ===");
-    Console.WriteLine($"Path: {context.Request.Path}");
-    Console.WriteLine($"Cookie present: {token != null}");
-    Console.WriteLine($"User authenticated: {user?.IsAuthenticated}");
-    Console.WriteLine($"User name: {user?.Name ?? "null"}");
-    Console.WriteLine($"Claims: {string.Join(" | ", context.User.Claims.Select(c => $"{c.Type}={c.Value}"))}");
-    Console.WriteLine("==================");
-
-    await next();
-});
-
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
