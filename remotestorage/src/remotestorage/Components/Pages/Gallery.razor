@@ -1,10 +1,11 @@
 @using Microsoft.Extensions.Configuration;
 @using remotestorage.Models;
 @using Microsoft.AspNetCore.Authorization
+@inject IHttpClientFactory HttpFactory
 
 @page "/images"
 
-@attribute [Authorize]
+
 @rendermode InteractiveServer
 
 <div class="gallery">
@@ -40,8 +41,11 @@
     {
         try
         {
-            Images = await Http.GetFromJsonAsync<List<Image>>("image")
+            HttpClient client = HttpFactory.CreateClient("API");            
+            
+            Images = await client.GetFromJsonAsync<List<Image>>("image")
             ?? new List<Image>();
+            
             Console.WriteLine($"Loaded {Images.Count} images.");
         }
         catch (Exception ex)

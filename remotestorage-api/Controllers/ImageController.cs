@@ -3,6 +3,7 @@ using remotestorage_api.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace remotestorage_api.Controllers;
 
@@ -10,50 +11,29 @@ namespace remotestorage_api.Controllers;
 [Route("[controller]")]
 public class ImageController : ControllerBase
 {
-    public ImageController()
-    {
-    }
-
-    // GET all action
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetImages()
     {
         var images = await ImageService.GetAll();
         return Ok(images);
     }
 
-    // GET by Id action
-
-    [HttpGet("{id}")]//ByField
+    [HttpGet("{id}")]
     public async Task<ActionResult<Image>> Get(int id)
     {
         var image = await ImageService.Get(id);
         if (image == null)
         {
-            return NotFound(); // API specific syntax to return back an unsucessfull call!
+            return NotFound();
         }
         return Ok(image);
     }
 
-    //[HttpGet("by-query")]
-    ////public ActionResult<Image> GetByQuery([FromQuery] int id) //Fromquery filters the value haha!
-    //{
-    //    var image = ImageService.Get(id);
-    //    if (image == null)
-    //    {
-    //        return NotFound(); // API specific syntax to return back an unsucessfull call!
-    //    }
-    //    return Ok(Image);
-    //}
-
-    // POST action
-
-    // return CreatedAtAction(nameof(Get), new { id = Image.Id }, Image);
-
     const int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
     [HttpPost]
     [RequestSizeLimit(MAX_FILE_SIZE)]
-
     public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -82,10 +62,6 @@ public class ImageController : ControllerBase
         }
     }
 
-    // PUT action
-
-
-    // DELETE action
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -100,6 +76,4 @@ public class ImageController : ControllerBase
             return NotFound();
         }
     }
-
-
 }
