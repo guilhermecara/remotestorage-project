@@ -49,6 +49,8 @@
                 @if(!String.IsNullOrEmpty(errorMessage)) {
                     <p>@errorMessage</p>
                 }
+
+                <a href="/">Go back home DEBUG</a>
             </form>
             <DebugCookie></DebugCookie>
         </div>
@@ -102,15 +104,21 @@
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-
                     // 1. LOG THE SET-COOKIE HEADER
                     await LogMessage("SET-COOKIE: " + string.Join(" | ", response.Headers.GetValues("Set-Cookie")));
+                    TokenResponse? responseContent = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                    if (responseContent?.Token != null) 
+                    {
+                        var simpleCookie = $"auth_token={responseContent.Token}; path=/; SameSite=Strict";
+                        await JSRuntime.InvokeVoidAsync("eval", 
+                            $"document.cookie = '{simpleCookie}'");
+                    }
 
-                    //Navigation.NavigateTo("/", forceLoad: true);
+                    Navigation.NavigateTo("/", forceLoad: true);
                 }
                 else
                 {
-                    errorMessage = $"Erro ao autenticar: {response.StatusCode}";
+                    errorMessage = $"Server error: {response.StatusCode}";
                 }
             }
         catch (HttpRequestException ex)

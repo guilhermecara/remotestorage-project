@@ -69,7 +69,7 @@ public class AuthController : ControllerBase
 
         try
         {
-            string jwtToken = _jwtService.GenerateToken(request.Username);
+            string token = _jwtService.GenerateToken(request.Username);
 
             CookieOptions cookieOptions = new CookieOptions
             {
@@ -80,9 +80,9 @@ public class AuthController : ControllerBase
                 Path = "/"
             };
 
-            Response.Cookies.Append("auth_token", jwtToken, cookieOptions);
+            Response.Cookies.Append("auth_token", token, cookieOptions);
             
-            return Ok();
+            return Ok(new {token});
         }
             catch (Exception ex)
         {

@@ -6,6 +6,8 @@ using remotestorage.Components;
 using remotestorage.AuthenticationService;
 using System.Net;
 using System.Net.Http;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,12 +31,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"]
         };
 
         options.Events = new JwtBearerEvents
@@ -56,8 +57,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddRouting();
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddRouting();
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 
 // === BLAZOR SETUP ===
 builder.Services.AddRazorComponents()
@@ -86,6 +88,22 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Cookies["auth_token"];
+    var user = context.User.Identity;
+
+    Console.WriteLine("=== AUTH DEBUG ===");
+    Console.WriteLine($"Path: {context.Request.Path}");
+    Console.WriteLine($"Cookie present: {token != null}");
+    Console.WriteLine($"User authenticated: {user?.IsAuthenticated}");
+    Console.WriteLine($"User name: {user?.Name ?? "null"}");
+    Console.WriteLine($"Claims: {string.Join(" | ", context.User.Claims.Select(c => $"{c.Type}={c.Value}"))}");
+    Console.WriteLine("==================");
+
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
