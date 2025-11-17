@@ -10,10 +10,10 @@ namespace remotestorage_api.Controllers;
 public class AuthController : ControllerBase
 {   
 
-    private readonly JwtService _jwtService;
-    public AuthController(JwtService jwtService)
+    private readonly AuthService _authService;
+    public AuthController(AuthService authService)
     {
-        _jwtService = jwtService;
+        _authService = authService;
     }   
 
     [HttpPost("register")]
@@ -24,18 +24,12 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        if (await DatabaseService.UsernameExists(request.Username))
-        {
-            return Conflict(new { message = "Username already exists" });
-        }
-
-        string passwordHash = PasswordService.HashPassword(request.Password);
-
-        User createdUser = await DatabaseService.CreateUser(request.Username, passwordHash);
+        
+        User? createdUser = await _authService.Register(request);
 
         if (createdUser == null)
         {
-            return StatusCode(500, new { message = "Failed to create user!" });
+            return Conflict(new {message = "Invalid username"});
         }
 
         return Ok(
@@ -56,44 +50,25 @@ public class AuthController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        User? fetchedUser = await DatabaseService.FetchUser(request.Username);
-        if (fetchedUser == null)
-        {
-            return Conflict(new { message = "Invalid username or password." });
-        }
+        var token = await _authService.Login(request);
+        if (token == null)
+            return Unauthorized(new { message = "Invalid username or password" });
 
-        if (!PasswordService.VerifyPassword(request.Password, fetchedUser.PasswordHash))
+        Response.Cookies.Append("auth_token", token, new CookieOptions
         {
-            return Conflict(new { message = "Invalid password or password." });
-        }
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = false,
+            Expires = DateTime.UtcNow.AddMinutes(60),
+            Path = "/"
+        });
 
-        try
-        {
-            string token = _jwtService.GenerateToken(request.Username);
-
-            CookieOptions cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,                    // HTTPS only
-                SameSite = SameSiteMode.Lax,     // Required for cross-site
-                Expires = DateTime.UtcNow.AddMinutes(60),
-                Path = "/"
-            };
-
-            Response.Cookies.Append("auth_token", token, cookieOptions);
-            
-            return Ok(new {token});
-        }
-            catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }       
+        return Ok(new { token });       
     }
 
     [HttpPost("logout")] // POST to prevent CSRF via GET
     public IActionResult Logout()
     {
-        // Delete the auth cookie
         Response.Cookies.Delete("auth_token", new CookieOptions
         {
             HttpOnly = true,

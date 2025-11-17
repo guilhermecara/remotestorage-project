@@ -49,10 +49,7 @@
                 @if(!String.IsNullOrEmpty(errorMessage)) {
                     <p>@errorMessage</p>
                 }
-
-                <a href="/">Go back home DEBUG</a>
             </form>
-            <DebugCookie></DebugCookie>
         </div>
     </div> 
 </div>
@@ -140,7 +137,6 @@
 
     private bool IsValidLoginForm()
     {
-        // Check if fields are empty
         if (string.IsNullOrWhiteSpace(username))
         {
             errorMessage = "Username is required";

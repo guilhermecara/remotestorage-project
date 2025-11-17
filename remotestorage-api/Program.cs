@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 
 // JWT Authentication Service

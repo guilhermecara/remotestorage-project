@@ -15,6 +15,10 @@ public class ImageController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetImages()
     {
+        var user = User;
+        User.FindFirst("name");
+        var request = Request;
+        var jwt = Request.Cookies["auth_token"];  // <— HERE
         var images = await ImageService.GetAll();
         return Ok(images);
     }
