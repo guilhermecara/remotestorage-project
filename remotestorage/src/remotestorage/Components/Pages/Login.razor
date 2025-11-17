@@ -91,33 +91,26 @@
             return;
         }
 
-        try
-        {
-            string serverUrl = Navigation.BaseUri.TrimEnd('/');
-            HttpClient client = HttpFactory.CreateClient();
-            HttpResponseMessage? response = await client.PostAsJsonAsync($"{ApiUrl}/api/auth/login", new
+            try
             {
-                username,
-                password
-            });
+                HttpClient client = HttpFactory.CreateClient("API");
+                HttpResponseMessage? response = await client.PostAsJsonAsync("/api/auth/login", new
+                {
+                    username,
+                    password
+                });
 
-            if (response.IsSuccessStatusCode)
-            {
-                TokenResponse? responseContent = await response.Content.ReadFromJsonAsync<TokenResponse>();
-                if (responseContent?.Token != null) {
-                    var simpleCookie = $"auth_token={responseContent.Token}; path=/; SameSite=Strict";
-                    await JSRuntime.InvokeVoidAsync("eval", 
-                        $"document.cookie = '{simpleCookie}'");
-                    await LogMessage("Tried to make token!");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    await JSRuntime.InvokeVoidAsync("alert", json);
+                    //Navigation.NavigateTo("/", forceLoad: true);
                 }
-
-                Navigation.NavigateTo("/", forceLoad: true);
+                else
+                {
+                    errorMessage = $"Erro ao autenticar: {response.StatusCode}";
+                }
             }
-            else
-            {
-                errorMessage = $"Erro ao autenticar: {response.StatusCode}";
-            }
-        }
         catch (HttpRequestException ex)
         {
             errorMessage = "Unable to connect to server.";

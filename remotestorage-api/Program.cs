@@ -8,24 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<JwtService>();
-builder.Services.AddControllers();
 
-// CORS for frontend
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins(
-            "http://localhost:8080",              // Local frontend
-            "http://localhost:5184",              // Local alternate port
-            "http://frontend:8080")
-          .AllowAnyHeader()
-          .AllowAnyMethod();
-    });
-});
-
-// JWT Authentication
+// JWT Authentication Service
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
     {
@@ -39,9 +25,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["auth_token"];
+                if (!string.IsNullOrEmpty(token))
+                    context.Token = token;
+                return Task.CompletedTask;
+            },
+        };
     });;
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
+
+// CORS for frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+            "httpL//localhost:5000",              // Local frontend
+            "http://localhost:8080",              // Local frontend Docker
+            "http://localhost:5184",              // Local alternate port
+            "http://frontend:8080")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -49,6 +62,7 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run("http://0.0.0.0:5050");  // Listen on all interfaces

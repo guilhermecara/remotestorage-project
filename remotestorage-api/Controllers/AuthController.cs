@@ -70,7 +70,8 @@ public class AuthController : ControllerBase
         try
         {
             var token = _jwtService.GenerateToken(request.Username);
-            return Ok(new { token });
+            
+            return Ok();
         }
             catch (Exception ex)
         {

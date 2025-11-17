@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using remotestorage.Components;
 using remotestorage.AuthenticationService;
+using System.Net.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
