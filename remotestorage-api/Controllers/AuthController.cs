@@ -69,7 +69,18 @@ public class AuthController : ControllerBase
 
         try
         {
-            var token = _jwtService.GenerateToken(request.Username);
+            string jwtToken = _jwtService.GenerateToken(request.Username);
+
+            CookieOptions cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,                    // HTTPS only
+                SameSite = SameSiteMode.Lax,     // Required for cross-site
+                Expires = DateTime.UtcNow.AddMinutes(60),
+                Path = "/"
+            };
+
+            Response.Cookies.Append("auth_token", jwtToken, cookieOptions);
             
             return Ok();
         }
@@ -77,5 +88,20 @@ public class AuthController : ControllerBase
         {
             return BadRequest(ex.Message);
         }       
+    }
+
+    [HttpPost("logout")] // POST to prevent CSRF via GET
+    public IActionResult Logout()
+    {
+        // Delete the auth cookie
+        Response.Cookies.Delete("auth_token", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
+            Path = "/"
+        });
+
+        return Ok(new { Message = "Logged out successfully" });
     }
 }

@@ -1,0 +1,28 @@
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IJSRuntime JSRuntime
+@inject IHttpClientFactory HttpFactory
+
+<button @onclick="ShowCookie">Show Cookie</button>
+<pre>@CookieDebug</pre>
+
+@code {
+    private string CookieDebug = "";
+
+    private async void ShowCookie()
+    {
+        // 2. TRIGGER A PROTECTED CALL — COOKIE WILL BE SENT
+        HttpClient client = HttpFactory.CreateClient("API");
+        var profile = await client.GetAsync("/api/debug/testauth");
+        
+        await LogMessage("Profile call status: " + profile.StatusCode);
+        await LogMessage("The debug login status is: " + (await profile.Content.ReadAsStringAsync()));
+
+        CookieDebug = profile.StatusCode == System.Net.HttpStatusCode.OK ? "Authorized!" : "Unauthorized";
+    }
+
+    private async Task LogMessage(string msg)
+    {
+        await JSRuntime.InvokeVoidAsync("console.log", msg);
+    }
+
+}

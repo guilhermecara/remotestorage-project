@@ -1,13 +1,42 @@
 @page "/logout"
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IHttpClientFactory HttpFactory
 @inject NavigationManager Nav
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var context = HttpContextAccessor.HttpContext;
-        context?.Response.Cookies.Delete("auth_token");
+        // -------------------------------------------------
+        // 1. Delete the cookie locally (Blazor Server side)
+        // -------------------------------------------------
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext != null)
+        {
+            httpContext.Response.Cookies.Delete("auth_token", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure   = !httpContext.Request.IsHttps == false, // dev = false
+                SameSite = SameSiteMode.Lax,
+                Path     = "/"
+            });
+        }
 
+        // -------------------------------------------------
+        // 2. Tell the API to finish its own logout (optional)
+        // -------------------------------------------------
+        try
+        {
+            var client = HttpFactory.CreateClient("API");
+            await client.PostAsync("/api/auth/logout", null);
+        }
+        catch
+        {
+            // ignore – we already deleted the cookie
+        }
+
+        // -------------------------------------------------
+        // 3. Full reload → new circuit, no auth
+        // -------------------------------------------------
         Nav.NavigateTo("/login", forceLoad: true);
     }
 }

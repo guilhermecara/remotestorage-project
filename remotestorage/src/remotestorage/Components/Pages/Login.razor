@@ -50,6 +50,7 @@
                     <p>@errorMessage</p>
                 }
             </form>
+            <DebugCookie></DebugCookie>
         </div>
     </div> 
 </div>
@@ -69,8 +70,6 @@
 
     protected override void OnInitialized()
     {
-        ApiUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
-        Http.BaseAddress = new Uri(ApiUrl);
     }
 
     private void OnTogglePassword () {
@@ -99,11 +98,14 @@
                     username,
                     password
                 });
-
+                
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    await JSRuntime.InvokeVoidAsync("alert", json);
+
+                    // 1. LOG THE SET-COOKIE HEADER
+                    await LogMessage("SET-COOKIE: " + string.Join(" | ", response.Headers.GetValues("Set-Cookie")));
+
                     //Navigation.NavigateTo("/", forceLoad: true);
                 }
                 else
