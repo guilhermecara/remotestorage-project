@@ -10,8 +10,8 @@ RUN dotnet restore ./remotestorage-api.csproj
 COPY . .
 RUN dotnet publish -c Release -o /app
 
-# Use the official ASP.NET 9 runtime image for running
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+# Use the official ASP.NET 9 runtime DISTROLESS image for running
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 WORKDIR /app
 COPY --from=build /app ./
 
