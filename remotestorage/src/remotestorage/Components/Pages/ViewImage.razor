@@ -1,4 +1,4 @@
-@page "/image/{*Url}"
+@page "/image/{*imageId}"
 @using remotestorage.Models
 @rendermode InteractiveServer
 
@@ -7,7 +7,6 @@
 @if (!string.IsNullOrEmpty(ImageUrl))
 {
     <img src="@ImageUrl" alt="Image" class="photo" />
-    <p>The ImageUrl is : @ImageUrl</p>
 }
 else
 {
@@ -16,8 +15,7 @@ else
 
 @code {
     [Parameter]
-    public string? Url { get; set; }
-
+    public string? imageId { get; set; }
     private string ImageUrl = string.Empty;
     private string ApiBaseUrl = string.Empty;
 
@@ -27,10 +25,10 @@ else
     {
         ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
 
-        if (!string.IsNullOrEmpty(Url))
+        if (!string.IsNullOrEmpty(imageId))
         {
             // Construct the full image URL
-            ImageUrl = $"{ApiBaseUrl}{Url}?mode=lossless";
+            ImageUrl = $"{ApiBaseUrl}/api/image/view/{imageId}";
         }
     }
 }

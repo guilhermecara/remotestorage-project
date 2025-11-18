@@ -11,8 +11,8 @@
 <div class="gallery">
     @foreach (var image in Images)
     {
-        string url = $"{ApiBaseUrl}/api/image/view/{image.Name}";
-        string imageHref = $"/image/{image.Path}";
+        string url = $"{ApiBaseUrl}/api/image/preview/{image.Name}";
+        string imageHref = $"/image/{image.Name}";
         <a href = "@imageHref" >
             <img src="@(url)" alt="@image.Name" class="photo" />
         </a>

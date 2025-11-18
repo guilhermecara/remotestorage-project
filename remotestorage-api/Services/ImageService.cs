@@ -23,21 +23,16 @@ public static class ImageService
 
             while (await reader.ReadAsync())
             {
-                string fullResImageName = reader.GetString(1); 
+                string imageName = reader.GetString(1); 
                 string imagePath = reader.GetString(2);
+                string imageFolder = Path.GetDirectoryName(imagePath)?.Replace("\\", "/") ?? "";
 
-                string finalName = fullResImageName;
+                string finalRelativePath = Path.Combine(imagePath, imageName);
 
-                if (await FileService.ContainsImageInPath("lowres-" + fullResImageName + ".webp", imagePath))
-                {
-                    finalName = "lowres-" + fullResImageName;
-                }
-
-                string finalRelativePath = Path.Combine(imagePath, finalName);
                 imageData.Add(new Image
                 {
                     Id = -999999,
-                    Name = finalName,
+                    Name = imageName,
                     Path = finalRelativePath
                 });
             }
@@ -50,7 +45,7 @@ public static class ImageService
         return imageData;
     }
 
-    public static async Task<IActionResult?> Get(string userId, string imageName)
+    public static async Task<Image?> Get(string userId, string imageName)
     {
         Image retrievedImage = await DatabaseService.FetchImageFromIdSecured(userId,imageName);
         
@@ -59,8 +54,33 @@ public static class ImageService
             return null;
         }
 
-        return await FileService.StreamImage(retrievedImage.Path);
+        return retrievedImage;
     }
+
+    public static async Task<Image?> GetPreview (string userId, string imageName)
+    {
+        Image? retrievedImage = await Get(userId,imageName);
+        
+        if (retrievedImage == null)
+        {
+            return null;
+        }
+
+        // Manipulate the image path to find the lowres version of it if it exists.
+
+        string fullImagePath = retrievedImage.Path ?? "";
+        string lowresImageName = "lowres-" + Path.GetFileName(fullImagePath) + ".webp" ?? "";
+        string imageDirectory = Path.GetDirectoryName(fullImagePath) ?? "";
+        string lowresImagePath = imageDirectory + "/" + lowresImageName;
+
+        if (await FileService.ContainsImageInPath(lowresImageName, imageDirectory)) 
+        {
+            retrievedImage.Path = lowresImagePath;
+        }
+
+        return retrievedImage;
+    }
+
 
     public static async Task<Image?> Add(IFormFile file, string userId)
     {

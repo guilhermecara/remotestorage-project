@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace remotestorage_api.Controllers;
 
@@ -29,13 +30,28 @@ public class ImageController : ControllerBase
         if (userIdFromRequest is null)
             return BadRequest("Invalid user");
 
-        var imageStream = await ImageService.Get(userIdFromRequest, imageName);
-        if (imageStream == null)
+        Image? image = await ImageService.Get(userIdFromRequest, imageName);
+
+        if (image == null)
             return NotFound();
 
-        return imageStream;
+        return await FileService.StreamImage(image.Path) ?? StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpGet("preview/{imageName}")]
+    public async Task<IActionResult> GetPreviewImage([FromRoute] string imageName)
+    {
+        var userIdFromRequest = User.FindFirst("user_id")?.Value;
+        if (userIdFromRequest is null)
+            return BadRequest("Invalid user");
+
+        Image? image = await ImageService.GetPreview(userIdFromRequest, imageName);
+
+        if (image == null)
+            return NotFound();
+
+        return await FileService.StreamImage(image.Path) ?? StatusCode(StatusCodes.Status500InternalServerError);
+    }
 
     const int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
