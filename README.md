@@ -40,4 +40,4 @@ Make sure you have the following installed:
 4. **Access the frontend:**
    -Open your browser and go to 👉 http://localhost:8080
 
-Built with ❤️ by a first-year cegep student
+Built with by a first-year cegep student
