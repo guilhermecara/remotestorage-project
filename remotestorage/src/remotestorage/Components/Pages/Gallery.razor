@@ -11,7 +11,7 @@
 <div class="gallery">
     @foreach (var image in Images)
     {
-        string url = $"{ApiBaseUrl}{image.Path}";
+        string url = $"{ApiBaseUrl}/api/image/view/{image.Name}";
         string imageHref = $"/image/{image.Path}";
         <a href = "@imageHref" >
             <img src="@(url)" alt="@image.Name" class="photo" />
@@ -43,7 +43,7 @@
         {
             HttpClient client = HttpFactory.CreateClient("API");            
             
-            Images = await client.GetFromJsonAsync<List<Image>>("image")
+            Images = await client.GetFromJsonAsync<List<Image>>("api/image/view")
             ?? new List<Image>();
         }
         catch (Exception ex)

@@ -11,6 +11,6 @@ public class FileController : ControllerBase
     [HttpGet("{**path}")]
     public async Task<IActionResult> ReadImage(string path,[FromQuery] string? mode = "performance")
     {
-        return await FileService.StreamImage(path,mode);
+        return NotFound();
     }
 }

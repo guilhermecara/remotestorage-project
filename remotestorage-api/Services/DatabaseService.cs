@@ -94,4 +94,34 @@ public static class DatabaseService
         return null;
     }   
 
+    public static async Task<Image?> FetchImageFromIdSecured (string userId, string imageName)
+    {
+        await using var command = CreateQuery(
+            "SELECT id, name, user_id, path FROM images WHERE user_id = @userId AND name = @imageName;"
+        );
+
+        command.Parameters.AddWithValue("userId", Guid.Parse(userId));
+        command.Parameters.AddWithValue("imageName", imageName);
+
+        await using var reader = await command.ExecuteReaderAsync();
+
+        if (!await reader.ReadAsync())
+            return null;
+
+        var id = reader.GetInt32(0);
+        var name = reader.GetString(1);
+        var ownerId = reader.GetGuid(2).ToString();
+        var path = reader.GetString(3);
+
+        if (ownerId != userId)
+            return null;
+
+        return new Image
+        {
+            Id = id,
+            Name = name,
+            Path = path
+        };
+    }
+
 }

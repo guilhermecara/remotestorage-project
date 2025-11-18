@@ -64,7 +64,7 @@ public static class FileService
         return stream;
     }
 
-    public static async Task<IActionResult> StreamImage(string imagePath, string mode)
+    public static async Task<IActionResult> StreamImage(string imagePath)
     {
         var safePath = Path.GetFullPath(Path.Combine(applicationRootDirectory, imagePath));
 
@@ -84,17 +84,9 @@ public static class FileService
             return new NotFoundResult();
         }
 
-        if (mode == "lossless")
-        {
-            var stream = await ProcessQualityImage(safePath);
-            var mimeType = GetMimeType(Path.GetExtension(safePath));
-            return new FileStreamResult(stream, mimeType);
-        }
-        else
-        {
-            MemoryStream stream = await ProcessPerformanceImage(safePath);
-            return new FileStreamResult(stream, "image/webp");
-        }
+        var stream = new FileStream(safePath, FileMode.Open, FileAccess.Read);
+        var mimeType = GetMimeType(Path.GetExtension(safePath));
+        return new FileStreamResult(stream, mimeType);
     }
 
     public static async Task<Models.Image> UploadImage(IFormFile file, string ownerGuid)
@@ -129,8 +121,9 @@ public static class FileService
 
         // Save low-res version of image to disk.
 
+        string lowresFilePath = Path.Combine(userDirectory, "lowres-"+fileName);
         MemoryStream lowResImageStream = await CachePerformanceImage(file);
-        using (var outputStream = new FileStream(filePath + "-lowres.webp", FileMode.Create))
+        using (var outputStream = new FileStream(lowresFilePath + ".webp", FileMode.Create))
         {
             await lowResImageStream.CopyToAsync(outputStream);
         }
@@ -149,6 +142,32 @@ public static class FileService
             Path = Path.Combine(ownerGuid,fileName)
         };
     }
+
+    public static Task<bool> ContainsImageInPath(string image, string path)
+    {
+        if (string.IsNullOrWhiteSpace(image) || string.IsNullOrWhiteSpace(path))
+            return Task.FromResult(false);
+
+        // Combine root + user path safely
+        string root = Path.GetFullPath(applicationRootDirectory);
+        string userPath = Path.GetFullPath(Path.Combine(root, path));
+
+        // Prevent directory traversal attempts
+        if (!userPath.StartsWith(root))
+            return Task.FromResult(false);
+
+        // Full image path
+        string imagePath = Path.GetFullPath(Path.Combine(userPath, image));
+
+        // Extra security: ensure the image stays inside the target user directory
+        if (!imagePath.StartsWith(userPath))
+            return Task.FromResult(false);
+
+        bool exists = File.Exists(imagePath);
+        return Task.FromResult(exists);
+    }
+
+
 
     public static async void CreateDirectory (string path) // Assuming the root is the physical folder
     {

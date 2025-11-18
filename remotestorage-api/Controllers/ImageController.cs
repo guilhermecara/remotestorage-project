@@ -11,28 +11,31 @@ namespace remotestorage_api.Controllers;
 [Route("api/[controller]")]
 public class ImageController : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("view")]
     [Authorize]
     public async Task<IActionResult> GetImages()
     {
-        var user = User;
-        User.FindFirst("name");
-        var request = Request;
-        var jwt = Request.Cookies["auth_token"]; 
-        var images = await ImageService.GetAll();
+        var userIdFromRequest = User.FindFirst("user_id")?.Value;
+        if (userIdFromRequest is null)
+            return BadRequest("Invalid user");
+        var images = await ImageService.GetAll(userIdFromRequest);
         return Ok(images);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Image>> Get(int id)
+    [HttpGet("view/{imageName}")]
+    public async Task<IActionResult> GetImage([FromRoute] string imageName)
     {
-        var image = await ImageService.Get(id);
-        if (image == null)
-        {
+        var userIdFromRequest = User.FindFirst("user_id")?.Value;
+        if (userIdFromRequest is null)
+            return BadRequest("Invalid user");
+
+        var imageStream = await ImageService.Get(userIdFromRequest, imageName);
+        if (imageStream == null)
             return NotFound();
-        }
-        return Ok(image);
+
+        return imageStream;
     }
+
 
     const int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
@@ -71,6 +74,7 @@ public class ImageController : ControllerBase
         }
     }
 
+        /*
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -85,4 +89,5 @@ public class ImageController : ControllerBase
             return NotFound();
         }
     }
+        */
 }
