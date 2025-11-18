@@ -4,6 +4,7 @@
 
 @page "/upload"
 @using System.Runtime.InteropServices
+@inject IHttpClientFactory HttpFactory
 
 @rendermode InteractiveServer
 
@@ -114,8 +115,8 @@
             streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(selectedFile.ContentType);
             content.Add(streamContent, "file", selectedFile.Name);
 
-            string apiUrl = ApiInternalUrl + "/image";
-            var response = await Http.PostAsync(apiUrl, content);
+            HttpClient client = HttpFactory.CreateClient("API");            
+            var response = await client.PostAsync("api/image/upload",content);
 
             if (response.IsSuccessStatusCode)
             {

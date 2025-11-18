@@ -12,15 +12,16 @@ namespace remotestorage_api.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string username)
+        public string GenerateToken(string username, Guid userId)
         {
             var key = new SymmetricSecurityKey(
               Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
 
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            Claim[] claims = new[]
             {
+                new Claim("user_id", userId.ToString()),
                 new Claim(ClaimTypes.Name, username)
             };
 

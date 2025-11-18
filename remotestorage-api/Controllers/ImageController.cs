@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace remotestorage_api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class ImageController : ControllerBase
 {
     [HttpGet]
@@ -18,7 +18,7 @@ public class ImageController : ControllerBase
         var user = User;
         User.FindFirst("name");
         var request = Request;
-        var jwt = Request.Cookies["auth_token"];  // <— HERE
+        var jwt = Request.Cookies["auth_token"]; 
         var images = await ImageService.GetAll();
         return Ok(images);
     }
@@ -36,9 +36,10 @@ public class ImageController : ControllerBase
 
     const int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-    [HttpPost]
+    [HttpPost("upload")]
+    [Authorize]
     [RequestSizeLimit(MAX_FILE_SIZE)]
-    public async Task<IActionResult> UploadImage([FromForm] IFormFile file)
+    public async Task<IActionResult> Upload([FromForm] IFormFile file)
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded.");
@@ -46,9 +47,14 @@ public class ImageController : ControllerBase
         if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             return BadRequest("Only image files are allowed.");
 
+        if (User.FindFirst("user_id") == null)
+            return BadRequest("Invalid user");
+        else if (User.FindFirst("user_id").Value == null)
+            return BadRequest("Invalid user");
+
         try
         {
-            var newImage = await ImageService.Add(file);
+            var newImage = await ImageService.Add(file, User.FindFirst("user_id").Value);
 
             if (newImage == null)
                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed to save image.");

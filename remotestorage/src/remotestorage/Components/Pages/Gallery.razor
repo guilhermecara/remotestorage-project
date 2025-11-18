@@ -11,10 +11,10 @@
 <div class="gallery">
     @foreach (var image in Images)
     {
-        string url = $"{ApiBaseUrl}{image.url}";
-        string imageHref = $"/image/{image.url}";
+        string url = $"{ApiBaseUrl}{image.Path}";
+        string imageHref = $"/image/{image.Path}";
         <a href = "@imageHref" >
-            <img src="@(url)" alt="@image.name" class="photo" />
+            <img src="@(url)" alt="@image.Name" class="photo" />
         </a>
     }
 </div>
@@ -60,7 +60,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                var img = Images.FirstOrDefault(i => i.id == id);
+                var img = Images.FirstOrDefault(i => i.Id == id);
                 if (img != null)
                 {
                     Images.Remove(img);

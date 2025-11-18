@@ -13,9 +13,10 @@ public static class DatabaseService
     static private int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060; // Default port for development
     static private NpgsqlDataSource dataSource = NpgsqlDataSource.Create(GetConnectionString());
 
-    private static string GetConnectionString() =>
-        $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
-
+    private static string GetConnectionString()
+    {
+        return $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
+    }
 
     public static NpgsqlCommand CreateQuery(string query)
     {
@@ -34,7 +35,6 @@ public static class DatabaseService
         var command = CreateQuery(query);
         return await command.ExecuteNonQueryAsync(); // For INSERT/UPDATE/DELETE
     }
-
 
     public static async Task<bool> UsernameExists(string username)
     {
@@ -62,7 +62,7 @@ public static class DatabaseService
         {
             return new User
             {
-                Id = reader.GetInt32(0),           // Column 0: id
+                Id = reader.GetGuid(0),             // Column 0: id
                 Username = reader.GetString(1),     // Column 1: username
                 PasswordHash = reader.GetString(2), // Column 2: password_hash
                 CreatedAt = reader.GetDateTime(3),  // Column 3: created_at
@@ -84,7 +84,7 @@ public static class DatabaseService
         {
             return new User
             {
-                Id = reader.GetInt32(0),           // Column 0: id
+                Id = reader.GetGuid(0),             // Column 0: id
                 Username = reader.GetString(1),     // Column 1: username
                 PasswordHash = reader.GetString(2), // Column 2: password_hash
                 CreatedAt = reader.GetDateTime(3),  // Column 3: created_at

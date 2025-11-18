@@ -14,7 +14,7 @@ namespace remotestorage_api.Services;
 public static class FileService
 {
 
-    static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? Environment.GetEnvironmentVariable("FALLBACK_IMAGE_DIR");
+    static string applicationRootDirectory = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? Environment.GetEnvironmentVariable("FALLBACK_IMAGE_DIR");
 
     private static async Task<MemoryStream> CachePerformanceImage(IFormFile file)
     {
@@ -66,9 +66,9 @@ public static class FileService
 
     public static async Task<IActionResult> StreamImage(string imagePath, string mode)
     {
-        var safePath = Path.GetFullPath(Path.Combine(imageDir, imagePath));
+        var safePath = Path.GetFullPath(Path.Combine(applicationRootDirectory, imagePath));
 
-        if (!safePath.StartsWith(imageDir))
+        if (!safePath.StartsWith(applicationRootDirectory))
         {
             return new BadRequestObjectResult("Invalid path.");
         }
@@ -97,7 +97,7 @@ public static class FileService
         }
     }
 
-    public static async Task<Models.Image> UploadImage(IFormFile file)
+    public static async Task<Models.Image> UploadImage(IFormFile file, string ownerGuid)
     {
         // Validate the file
         if (file == null || file.Length == 0)
@@ -108,14 +108,18 @@ public static class FileService
             throw new ArgumentException("File type not allowed.");
 
         // Ensure directory exists
-        if (!System.IO.Directory.Exists(imageDir))
-            System.IO.Directory.CreateDirectory(imageDir);
+        if (!System.IO.Directory.Exists(applicationRootDirectory))
+            System.IO.Directory.CreateDirectory(applicationRootDirectory);
 
         // Create a unique file name
         
         string fileName = Path.GetFileNameWithoutExtension(file.FileName) + "-" + GUIDService.GenerateGuidString() + Path.GetExtension(file.FileName);
-        string filePath = Path.Combine(imageDir, fileName);
 
+        // Define a safe path for the file
+
+        string userDirectory = Path.Combine(applicationRootDirectory,ownerGuid);
+        string filePath = Path.Combine(userDirectory, fileName);
+        
         // Save original file to disk
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -126,20 +130,10 @@ public static class FileService
         // Save low-res version of image to disk.
 
         MemoryStream lowResImageStream = await CachePerformanceImage(file);
-
-        using (var stream = new FileStream(filePath + "-lowres.webp", FileMode.Create))
-        {
-            await file.CopyToAsync(lowResImageStream);
-        }
-        
         using (var outputStream = new FileStream(filePath + "-lowres.webp", FileMode.Create))
         {
             await lowResImageStream.CopyToAsync(outputStream);
         }
-
-
-        // Default to current time
-        //DateTimeOffset postedDate = DateTimeOffset.UtcNow;
 
         // Read metadata using MetadataExtractor
         IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(filePath);
@@ -152,9 +146,14 @@ public static class FileService
         return new Models.Image
         {
             Name = fileName,
-            Url = fileName, // relative path or to be prefixed later
-
+            Path = Path.Combine(ownerGuid,fileName)
         };
+    }
+
+    public static async void CreateDirectory (string path) // Assuming the root is the physical folder
+    {
+        string newDirectoryPath = Path.Combine(applicationRootDirectory, path);
+        DirectoryInfo directoryInfo = System.IO.Directory.CreateDirectory(newDirectoryPath);
     }
 
     private static string GetMimeType(string extension)

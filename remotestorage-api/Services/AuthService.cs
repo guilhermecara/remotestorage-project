@@ -17,7 +17,7 @@ public class AuthService
         if (!PasswordService.VerifyPassword(request.Password, user.PasswordHash))
             return null;
 
-        return _jwtService.GenerateToken(request.Username);
+        return _jwtService.GenerateToken(user.Username, user.Id);
     }
 
     public async Task<User?> Register(RegisterRequest request)
@@ -28,7 +28,14 @@ public class AuthService
         }
 
         string passwordHash = PasswordService.HashPassword(request.Password);
-        var user = await DatabaseService.CreateUser(request.Username, passwordHash); 
+        User? user = await DatabaseService.CreateUser(request.Username, passwordHash); 
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        FileService.CreateDirectory(user.Id.ToString());
 
         return user;
     }
