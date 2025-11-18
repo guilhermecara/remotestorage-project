@@ -1,6 +1,142 @@
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient Http
+@attribute [Authorize]
+
 @page "/upload"
+@using System.Runtime.InteropServices
+@inject IHttpClientFactory HttpFactory
 
 @rendermode InteractiveServer
 
-<h1>Upload Image</h1>
+<div class="upload-container">
+    <h1>Upload Image</h1>
 
+    <div class="input-buttons">
+        <InputFile OnChange="LoadFile" accept="image/*" id="fileInput" style="display:none"/>
+        <label for="fileInput" class="btn btn-file">Choose from PC</label>
+        <button class="btn btn-upload" @onclick="ConfirmUpload" disabled="@(string.IsNullOrEmpty(FileName))">Confirm Upload</button>
+
+        @if (!string.IsNullOrEmpty(FileName))
+        {
+            <div class="file-info show">
+                @if (!string.IsNullOrEmpty(ImageDataUrl))
+                {
+                    <div class="image-preview">
+                        <img src="@ImageDataUrl" alt="Selected image preview" />
+                    </div>
+                }
+                <p><span>File Name:</span> @FileName</p>
+                <p><span>File Size:</span> @(FileSize / 1024) KB</p>
+                <p><span>File Type:</span> @FileType</p>
+                <p><span>Last Modified:</span> @LastModified.ToString("g")</p>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="error-message show">
+                @ErrorMessage
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    const int MAX_FILESIZE = 5000 * 1024; // 5 MB
+    public string FileName { get; set; } = "";
+    public long FileSize { get; set; }
+    public string FileType { get; set; } = "";
+    public DateTimeOffset LastModified { get; set; }
+    public string ErrorMessage { get; set; } = "";
+    public string ImageDataUrl { get; set; } = ""; // Store the image data URL
+    private IBrowserFile? selectedFile; // Store the selected file
+
+    private string ApiInternalUrl = string.Empty;
+    private string ApiBaseUrl = string.Empty;
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ApiInternalUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") ?? Configuration.GetValue<string>("API_BASE_URL") ?? throw new InvalidOperationException("API_BASE_URL not configured.");
+        Http.BaseAddress = new Uri(ApiInternalUrl);
+        ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL") ?? throw new InvalidOperationException("API_BASE_URL not configured.");
+    }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        ErrorMessage = "";
+        ImageDataUrl = ""; // Reset image preview
+        selectedFile = e.File;
+
+        if (selectedFile.Size > MAX_FILESIZE)
+        {
+            ErrorMessage = "File is too large. Maximum size is 5MB.";
+            selectedFile = null;
+            FileName = "";
+            return;
+        }
+
+        try
+        {
+            // Read the file as a data URL for preview
+            using var stream = selectedFile.OpenReadStream(MAX_FILESIZE);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
+            ImageDataUrl = $"data:{selectedFile.ContentType};base64,{Convert.ToBase64String(bytes)}";
+
+            FileSize = selectedFile.Size;
+            FileType = selectedFile.ContentType;
+            FileName = selectedFile.Name;
+            LastModified = selectedFile.LastModified;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error reading file: {ex.Message}";
+            selectedFile = null;
+            FileName = "";
+        }
+
+        await InvokeAsync(StateHasChanged); // Ensure UI updates
+    }
+
+    private async Task ConfirmUpload()
+    {
+        if (selectedFile == null)
+        {
+            ErrorMessage = "No file selected.";
+            return;
+        }
+
+        try
+        {
+            var content = new MultipartFormDataContent();
+            var streamContent = new StreamContent(selectedFile.OpenReadStream(MAX_FILESIZE));
+            streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(selectedFile.ContentType);
+            content.Add(streamContent, "file", selectedFile.Name);
+
+            HttpClient client = HttpFactory.CreateClient("API");            
+            var response = await client.PostAsync("api/image/upload",content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                FileName = "";
+                FileSize = 0;
+                FileType = "";
+                LastModified = default;
+                ImageDataUrl = "";
+                selectedFile = null;
+            }
+            else
+            {
+                ErrorMessage = $"Upload failed ({response.StatusCode}): {await response.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error: {ex.Message}";
+        }
+        await InvokeAsync(StateHasChanged); // Ensure UI updates
+    }
+}

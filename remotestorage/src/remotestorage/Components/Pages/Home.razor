@@ -1,11 +1,26 @@
-﻿@page "/"
+﻿@using Microsoft.AspNetCore.Authorization;
+@using System.Reflection.Metadata
+@using remotestorage.Components.Layout
+@using remotestorage.Models
 
-<div class = "page">
-    <PageTitle>Home</PageTitle>
+@attribute [Authorize]
 
-    <h1>Hello, world!</h1>
+@layout MainLayout
+@rendermode InteractiveServer
 
-    Welcome to your new app.
+@page "/"
 
-    I wanted to modify this on the dev branch on a secondary computer. Wonder what will happen?
+<PageTitle>Home</PageTitle>
+
+<div class="layout">
+    <div class="page">
+        <div class="left-side">
+            <h1>Welcome back</h1>
+            <h3>Your photos are waiting for you — just a click away!</h3>
+        </div>
+
+        <div class="right-side">
+            <p>Enter your gallery!</p>
+        </div>
+    </div>
 </div>

@@ -1,6 +1,28 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using remotestorage.Components
+
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <CascadingAuthenticationState>
+            <AuthorizeRouteView RouteData="@routeData"
+                DefaultLayout="@typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+
+                <Authorizing>
+                    <div class="p-4 text-center">
+                        <p>Authenticating...</p>
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+        </CascadingAuthenticationState>
     </Found>
+
+    <NotFound>
+        <LayoutView Layout="@typeof(Layout.MainLayout)">
+            <p class="p-4 text-center">Sorry, the page could not be found.</p>
+        </LayoutView>
+    </NotFound>
 </Router>

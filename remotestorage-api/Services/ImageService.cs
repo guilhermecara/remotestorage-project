@@ -2,81 +2,123 @@ using System;
 using remotestorage_api.Models;
 using Npgsql;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace remotestorage_api.Services;
 
 public static class ImageService
 {
-    // Database connection parameters from environment variables or default values for development
-    static string connectionUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "guilhermeuser"; // Default user for development
-    static string connectionPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "LIbolo0$"; // Default password for development
-    static string connectionDb = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "database"; // Default database for development
-    static string connectionHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost"; // Default host for development
-    static int connectionPort = int.TryParse(Environment.GetEnvironmentVariable("DB_PORT"), out var port) ? port : 6060; // Default port for development
-    static string imageDir = Environment.GetEnvironmentVariable("IMAGE_DIR") ?? Environment.GetEnvironmentVariable("FALLBACK_IMAGE_DIR");
-
-    private static string GetConnectionString() =>
-        $"Host={connectionHost};Port={connectionPort};Username={connectionUser};Password={connectionPassword};Database={connectionDb}";
-
-    public static async Task<List<Image>> GetAll()
+    public static async Task<List<Image>> GetAll(string userId)
     {
         List<Image> imageData = new List<Image>();
-        await using NpgsqlDataSource dataSource = NpgsqlDataSource.Create(GetConnectionString());
-        await using NpgsqlCommand command = dataSource.CreateCommand("SELECT id, name, url FROM images");
-        await using NpgsqlDataReader reader = await command.ExecuteReaderAsync();
 
-        while (await reader.ReadAsync())
+        try
         {
-            string relativeUrl = reader.GetString(2).TrimStart('/');
-            imageData.Add(new Image
+            await using var command = DatabaseService.CreateQuery(
+            "SELECT id, name, path FROM images WHERE user_id = @userId;"
+            );
+
+            command.Parameters.AddWithValue("userId", Guid.Parse(userId));
+            await using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
             {
-                Id = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Url = "/api/file/" + relativeUrl
-            });
+                string imageName = reader.GetString(1); 
+                string imagePath = reader.GetString(2);
+                string imageFolder = Path.GetDirectoryName(imagePath)?.Replace("\\", "/") ?? "";
+
+                string finalRelativePath = Path.Combine(imagePath, imageName);
+
+                imageData.Add(new Image
+                {
+                    Id = -999999,
+                    Name = imageName,
+                    Path = finalRelativePath
+                });
+            }
+
+        }
+        catch (Exception e)
+        {
         }
 
         return imageData;
     }
 
-    public static async Task<Image?> Get(int ImageId)
+    public static async Task<Image?> Get(string userId, string imageName)
     {
-        await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
-        await using var command = dataSource.CreateCommand("SELECT id, name, url FROM images WHERE id = @id");
-        command.Parameters.AddWithValue("id", ImageId);
-
-        await using var reader = await command.ExecuteReaderAsync();
-
-        Image fetchImage = new Image();
-        while (await reader.ReadAsync())
+        Image retrievedImage = await DatabaseService.FetchImageFromIdSecured(userId,imageName);
+        
+        if (retrievedImage == null)
         {
-            fetchImage.Id = reader.GetInt32(0);     // column 0 -> id
-            fetchImage.Name = reader.GetString(1);   // column 1 -> name
-            fetchImage.Url = reader.GetString(2);     // column 2 -> url
-
-            return fetchImage;
+            return null;
         }
 
+        return retrievedImage;
+    }
+
+    public static async Task<Image?> GetPreview (string userId, string imageName)
+    {
+        Image? retrievedImage = await Get(userId,imageName);
+        
+        if (retrievedImage == null)
+        {
+            return null;
+        }
+
+        // Manipulate the image path to find the lowres version of it if it exists.
+
+        string fullImagePath = retrievedImage.Path ?? "";
+        string lowresImageName = "lowres-" + Path.GetFileName(fullImagePath) + ".webp" ?? "";
+        string imageDirectory = Path.GetDirectoryName(fullImagePath) ?? "";
+        string lowresImagePath = imageDirectory + "/" + lowresImageName;
+
+        if (await FileService.ContainsImageInPath(lowresImageName, imageDirectory)) 
+        {
+            retrievedImage.Path = lowresImagePath;
+        }
+
+        return retrievedImage;
+    }
+
+
+    public static async Task<Image?> Add(IFormFile file, string userId)
+    {
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("No file uploaded.");
+
+        Image uploadedImage = await FileService.UploadImage(file,userId);
+        if (uploadedImage == null)
+            return null;
+        
+        await using var command = DatabaseService.CreateQuery(
+            "INSERT INTO images (name, path, user_id) VALUES (@name, @path, @user_id) RETURNING id;"
+        );
+        command.Parameters.AddWithValue("name", uploadedImage.Name);
+        command.Parameters.AddWithValue("path", uploadedImage.Path);
+        command.Parameters.AddWithValue("user_id", Guid.Parse(userId));
+
+        var result = await command.ExecuteScalarAsync(); 
+        if (result is int id)
+        {
+            uploadedImage.Id = id;
+            return uploadedImage;
+        }
+        
         return null;
     }
 
-    public static void Add(Image image)
-    {
-    }
-
+/*
     public static async Task Delete(int id)
     {
         if (Get(id) != null)
         {
-            await using var dataSource = NpgsqlDataSource.Create(GetConnectionString());
-            await using var command = dataSource.CreateCommand("DELETE FROM images WHERE id = @id");
+            NpgsqlCommand command = DatabaseService.CreateQuery("DELETE FROM images WHERE id = @id");
             command.Parameters.AddWithValue("id", id);
             await command.ExecuteReaderAsync();
-
-            Console.WriteLine("Image deleted successfully");
         }
     }
-
+*/
     public static void Update(Image image)
     {
     }

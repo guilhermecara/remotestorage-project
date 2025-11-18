@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS images (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    path TEXT NOT NULL,
+    publication_date TIMESTAMP DEFAULT NOW(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
+);

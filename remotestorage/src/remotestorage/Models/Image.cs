@@ -1,4 +1,4 @@
-namespace remotestorage_api.Models;
+namespace remotestorage.Models;
 
 public class Image
 {

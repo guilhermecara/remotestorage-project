@@ -9,10 +9,8 @@ namespace remotestorage_api.Controllers;
 public class FileController : ControllerBase
 {
     [HttpGet("{**path}")]
-    public async Task<IActionResult> ReadImage(string path)
+    public async Task<IActionResult> ReadImage(string path,[FromQuery] string? mode = "performance")
     {
-        Console.WriteLine($"Tried accessing the image at path: {path}");
-        return await FileService.StreamImage(path);
+        return NotFound();
     }
-
 }

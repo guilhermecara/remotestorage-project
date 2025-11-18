@@ -1,0 +1,158 @@
+/* Container for the upload component */
+.upload-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 8px;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Heading style */
+h1 {
+    font-size: 1.8rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Container for buttons */
+.input-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Hide default file input */
+input[type="file"]#fileInput {
+    display: none;
+    visibility: hidden;
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+/* Base button styles */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-align: center;
+    display: inline-block;
+}
+
+/* File selection button */
+.btn-file {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.btn-file:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+}
+
+.btn-file:active {
+    transform: translateY(0);
+}
+
+/* Upload confirmation button */
+.btn-upload {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-upload:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-upload:active {
+    transform: translateY(0);
+}
+
+.btn-upload:disabled {
+    background-color: #d1d5db;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* File information display */
+.file-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    width: 100%;
+    display: none;
+}
+
+.file-info.show {
+    display: block;
+}
+
+/* Image preview styling */
+.image-preview {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* File info text */
+.file-info p {
+    margin: 0.5rem 0;
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.file-info p span {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Error message styling */
+.error-message {
+    color: #dc2626;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: center;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .upload-container {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .image-preview img {
+        max-height: 150px;
+    }
+}

@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject UIState UI // Dynamic UI Handling.
 
 <div class="page">
 
@@ -12,7 +13,10 @@
             <div class="top-row-searchbar">
                 <label for="search-input"><img src="/images/search.svg"/></label>
                 <input type="text" placeholder="Search your photos" id ="search-input"/>
-                <img src="/images/menu.svg"/>
+
+                <a href = "/">
+                    <img src="/images/menu.svg"/>
+                </a>
             </div>
 
             <div class="top-row-settings">
@@ -22,14 +26,23 @@
                     </a>
                     <label for="upload-button-id">Upload</label>
                 </div>
+
+                <div class = "logout-button">
+                    <a href="/logout">
+                        Logout
+                    </a>
+                    
+                </div>
             </div>
         </div>
 
         <div class="content">
-            <nav class = "content-navbar">
-                <NavMenu/>
-            </nav>
-
+            @if (UI.ShowNavbar)
+            {
+                <nav class="content-navbar@(UI.ShowNavbar ? "" : "-collapsed")">
+                    <NavMenu />
+                </nav>
+            }
             <div>
                 @Body
             </div>
@@ -42,3 +55,15 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code { 
+    protected override void OnInitialized()
+    {
+        UI.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        UI.OnChange -= StateHasChanged;
+    }
+}

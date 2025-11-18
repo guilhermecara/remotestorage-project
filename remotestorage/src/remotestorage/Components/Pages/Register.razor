@@ -1,0 +1,225 @@
+@page "/register"
+@using System.Reflection.Metadata
+@using System.Net
+@using remotestorage.Components.Layout
+@layout EmptyLayout
+@rendermode InteractiveServer
+
+<div class="page-wrapper">
+
+    <div class="register-container">
+        <div class="top-row-logo">
+            <img src="/images/logo.png" class="logo-img"/>
+            <span>GuiFotos™</span>
+        </div>
+
+        <div class="register-form">
+            <h1>Register</h1>
+            
+            <form @onsubmit="OnSubmitRegistrationForm">
+                <div class="input-option">
+                    <label for = "username-id">Username: </label>
+                    <input type="text" @bind="username" class="input-box" placeholder="Enter your username" id = "username-id"/>
+                </div>
+
+                <div class="input-option password-field">
+                    <label for="password-id">Password:</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="@(hiddenPassword ? "password" : "text")"
+                            class="input-box" 
+                            placeholder="Enter your password" 
+                            id="password-id"
+                            @bind="password"
+                        />
+                        <button type="button" class="toggle-password" @onclick="OnTogglePassword">
+                            @(hiddenPassword ? "Show" : "Hide")
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-option password-field">
+                    <label for="confirm-password-id">Confirm password:</label>
+                    <div class="password-wrapper">
+                        <input 
+                            type="@(hiddenPassword ? "password" : "text")"
+                            class="input-box" 
+                            placeholder="Enter your password" 
+                            id="confirm-password-id"
+                            @bind="@passwordMatch"
+                        />
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-button">Register</button>    
+
+                <p>Want to log in? <a href="/login">Click here</a></p
+            </form>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p style="color:red">@errorMessage</p>
+            }
+        </div>
+    </div> 
+</div>
+
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private IConfiguration Configuration { get; set; } = default!;
+
+    private string ApiUrl = string.Empty;
+    private bool hiddenPassword = true;
+    private bool isLoading = false;
+    
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string passwordMatch = string.Empty;
+    private string? errorMessage = null;
+
+    protected override void OnInitialized()
+    {
+        ApiUrl = Environment.GetEnvironmentVariable("API_DOCKER_URL") 
+                 ?? Configuration.GetValue<string>("API_BASE_URL") 
+                 ?? "http://localhost:5050";
+        
+        Http.BaseAddress = new Uri(ApiUrl);
+    }
+
+    private void OnTogglePassword() 
+    {
+        hiddenPassword = !hiddenPassword;
+    }
+
+    private async Task OnSubmitRegistrationForm() 
+    {
+        // Clear previous error
+        errorMessage = null;
+        
+        // Client-side validation
+        if (!ValidateForm())
+        {
+            return;
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/auth/register", new
+            {
+                username = username.Trim(),
+                password
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Success - redirect to login
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            // Handle different error status codes
+            await HandleErrorResponse(response);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = "Unable to connect to server. Please try again later.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private bool ValidateForm()
+    {
+        // Check if fields are empty
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            errorMessage = "Username is required";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Password is required";
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(passwordMatch))
+        {
+            errorMessage = "Please confirm your password";
+            return false;
+        }
+
+        // Check if passwords match
+        if (password != passwordMatch)
+        {
+            errorMessage = "The passwords don't match";
+            return false;
+        }
+
+        // Validate username
+        var usernameValidation = remotestorage.Services.UsernameService.ValidateUsername(username);
+        if (usernameValidation != "VALID")
+        {
+            errorMessage = usernameValidation;
+            return false;
+        }
+
+        // Validate password strength
+        var passwordValidation = remotestorage.Services.PasswordService.ValidatePassword(password);
+        if (passwordValidation != "VALID")
+        {
+            errorMessage = passwordValidation;
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task HandleErrorResponse(HttpResponseMessage response)
+    {
+        switch (response.StatusCode)
+        {
+            case System.Net.HttpStatusCode.Conflict:
+                errorMessage = "Username already exists.";
+                break;
+            case System.Net.HttpStatusCode.BadRequest:
+                // Try to parse validation errors from API
+                try
+                {
+                    var error = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                    if (error != null && error.TryGetValue("message", out var msg))
+                    {
+                        errorMessage = msg.ToString();
+                    }
+                    else
+                    {
+                        errorMessage = "Invalid registration data.";
+                    }
+                }
+                catch
+                {
+                    errorMessage = "Invalid registration data.";
+                }
+                break;
+            
+            case System.Net.HttpStatusCode.InternalServerError:
+                errorMessage = "Internal server error.";
+                break;
+            
+            default:
+                errorMessage = $"Registration failed. (Status: {response.StatusCode})";
+                break;
+        }
+    }
+}

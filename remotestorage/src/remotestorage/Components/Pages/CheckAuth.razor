@@ -1,0 +1,24 @@
+@page "/check-auth"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Status de Autenticação</h3>
+
+<p>Seu username : @userName</p>
+
+@code {
+    private bool isAuthenticated;
+    private string userName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        isAuthenticated = user.Identity?.IsAuthenticated == true;
+        if (isAuthenticated)
+        {
+            userName = user.Identity?.Name ?? "Anônimo";
+        }
+    }
+}

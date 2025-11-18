@@ -1,0 +1,34 @@
+@page "/image/{*imageId}"
+@using remotestorage.Models
+@rendermode InteractiveServer
+
+<h3>Image Viewer</h3>
+
+@if (!string.IsNullOrEmpty(ImageUrl))
+{
+    <img src="@ImageUrl" alt="Image" class="photo" />
+}
+else
+{
+    <p>Image not found.</p>
+}
+
+@code {
+    [Parameter]
+    public string? imageId { get; set; }
+    private string ImageUrl = string.Empty;
+    private string ApiBaseUrl = string.Empty;
+
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        ApiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? Configuration.GetValue<string>("API_BASE_URL");
+
+        if (!string.IsNullOrEmpty(imageId))
+        {
+            // Construct the full image URL
+            ImageUrl = $"{ApiBaseUrl}/api/image/view/{imageId}";
+        }
+    }
+}
