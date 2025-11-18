@@ -101,8 +101,6 @@
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
-                    // 1. LOG THE SET-COOKIE HEADER
-                    await LogMessage("SET-COOKIE: " + string.Join(" | ", response.Headers.GetValues("Set-Cookie")));
                     TokenResponse? responseContent = await response.Content.ReadFromJsonAsync<TokenResponse>();
                     if (responseContent?.Token != null) 
                     {
@@ -115,7 +113,7 @@
                 }
                 else
                 {
-                    errorMessage = $"Server error: {response.StatusCode}";
+                    await HandleErrorResponse(response);
                 }
             }
         catch (HttpRequestException ex)
@@ -154,7 +152,7 @@
     {
         switch (response.StatusCode)
         {
-            case System.Net.HttpStatusCode.Conflict:
+            case System.Net.HttpStatusCode.Unauthorized:
                 errorMessage = "Invalid username or password.";
                 break;
             
@@ -168,12 +166,12 @@
                     }
                     else
                     {
-                        errorMessage = "Invalid registration data.";
+                        errorMessage = "Bad request.";
                     }
                 }
                 catch
                 {
-                    errorMessage = "Invalid registration data.";
+                    errorMessage = "Bad request.";
                 }
                 break;
             
@@ -182,7 +180,7 @@
                 break;
             
             default:
-                errorMessage = $"Registration failed. (Status: {response.StatusCode})";
+                errorMessage = $"Login failed. (Status: {response.StatusCode})";
                 break;
         }
     }
