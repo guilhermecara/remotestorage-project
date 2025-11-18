@@ -12,7 +12,7 @@
     <h1>Upload Image</h1>
 
     <div class="input-buttons">
-        <InputFile OnChange="LoadFile" accept="image/*" id="fileInput" />
+        <InputFile OnChange="LoadFile" accept="image/*" id="fileInput" style="display:none"/>
         <label for="fileInput" class="btn btn-file">Choose from PC</label>
         <button class="btn btn-upload" @onclick="ConfirmUpload" disabled="@(string.IsNullOrEmpty(FileName))">Confirm Upload</button>
 

@@ -119,7 +119,7 @@ public static class FileService
             await file.CopyToAsync(stream);
         }
 
-        // Save low-res version of image to disk.
+        // Save low-res version of image to disk. PROCESSING INTENSIVE, USE RABBITMQ
 
         string lowresFilePath = Path.Combine(userDirectory, "lowres-"+fileName);
         MemoryStream lowResImageStream = await CachePerformanceImage(file);
